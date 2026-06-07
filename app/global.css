@@ -3,3 +3,14 @@
 @import "tailwindcss/utilities.css";
 
 @import "nativewind/theme";
+
+@theme {
+  --font-bebas: BebasNeue_400Regular;
+  --font-montserrat: Montserrat_400Regular;
+  --font-montserrat-bold: Montserrat_700Bold;
+
+  --color-brand-black: #000000;
+  --color-brand-green: #A8D030;
+  --color-brand-evergreen: #228B22;
+  --color-brand-mint: #F0FAF0;
+}

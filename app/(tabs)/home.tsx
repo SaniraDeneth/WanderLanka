@@ -3,6 +3,10 @@ import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import ScreenWrapper from "../../components/ScreenWrapper";
+import WanderCard from "../../components/home/WanderCard";
+import DestinationRow from "../../components/home/DestinationRow";
+import CategoryCircle from "../../components/home/CategoryCircle";
+import VibeChip from "../../components/home/VibeChip";
 import { dbService } from "../../services/dbService";
 import { useDestinationStore } from "../../store/useDestinationStore";
 import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
@@ -148,107 +152,96 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Vibe Chips Test Section */}
+        <View className="mb-6">
+          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
+            Testing Vibe Chips
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            <VibeChip label="NATURE" isActive={true} onPress={() => {}} />
+            <VibeChip label="CULTURE" isActive={false} onPress={() => {}} />
+            <VibeChip label="ADVENTURE" isActive={false} onPress={() => {}} />
+          </ScrollView>
+        </View>
+
         {/* Categories Section */}
         <View className="mb-6">
           <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
             Seeded Categories ({categories.length})
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
             {categories.map((cat) => (
-              <View
+              <CategoryCircle
                 key={cat.id}
-                className="bg-white border border-gray-100 rounded-full py-1.5 px-4 mr-2"
-              >
-                <Text className="font-montserrat text-xs text-brand-black">{cat.name}</Text>
-              </View>
+                name={cat.name}
+                imageUri={cat.imageUri}
+                isActive={false}
+                onPress={() => {}}
+              />
             ))}
           </ScrollView>
         </View>
 
-        {/* Destinations Section */}
+        {/* Destinations Section (Testing DestinationRow) */}
         <View className="mb-6">
           <Text className="font-bebas text-lg tracking-wider text-brand-black mb-1">
             Seeded Destinations ({destinations.length})
           </Text>
           <Text className="text-gray-400 text-[10px] font-montserrat mb-3">
-            Sorted by Haversine distance from Colombo (6.9271° N, 79.8612° E)
+            Testing DestinationRow & WanderCard
           </Text>
 
-          {sortedDestinations.map((dest) => (
-            <View
+          {sortedDestinations.slice(0, 2).map((dest) => (
+            <WanderCard
               key={dest.id}
-              className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-3 flex-row justify-between items-center"
-            >
-              <View className="flex-1 mr-4">
-                <Text className="font-bebas text-base text-brand-black">{dest.title}</Text>
-                <Text className="text-gray-500 font-montserrat text-xs mt-1" numberOfLines={2}>
-                  {dest.description}
-                </Text>
-                <View className="flex-row items-center mt-2 flex-wrap gap-2">
-                  <View className="bg-gray-100 px-2 py-0.5 rounded-md">
-                    <Text className="text-[10px] text-gray-600 font-montserrat-bold uppercase">
-                      {dest.vibeTag}
-                    </Text>
-                  </View>
-                  <Text className="text-[11px] text-brand-green font-montserrat-bold">
-                    {dest.rating} ⭐
-                  </Text>
-                  <Text className="text-[11px] text-gray-400 font-montserrat">
-                    ~{dest.distance} KM away
-                  </Text>
-                  <Text className="text-[11px] text-gray-400 font-montserrat-bold">
-                    • {dest.entryFee}
-                  </Text>
-                </View>
-              </View>
-              <Pressable
-                onPress={() => toggleFavorite(dest.id)}
-                className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center"
-              >
-                <Ionicons
-                  name={dest.isFavorite ? "heart" : "heart-outline"}
-                  size={20}
-                  color={dest.isFavorite ? "#FF3B30" : "#9CA3AF"}
-                />
-              </Pressable>
-            </View>
+              id={dest.id}
+              title={dest.title}
+              imageUri={dest.imageUri}
+              rating={dest.rating}
+              distance={dest.distance}
+              entryFee={dest.entryFee}
+              isFavorite={dest.isFavorite}
+              onPress={() => Alert.alert("Pressed", dest.title)}
+              onToggleFavorite={() => toggleFavorite(dest.id)}
+            />
+          ))}
+
+          {sortedDestinations.slice(2).map((dest) => (
+            <DestinationRow
+              key={dest.id}
+              id={dest.id}
+              title={dest.title}
+              imageUri={dest.imageUri}
+              rating={dest.rating}
+              vibeTag={dest.vibeTag}
+              isFavorite={dest.isFavorite}
+              onPress={() => Alert.alert("Pressed", dest.title)}
+              onToggleFavorite={() => toggleFavorite(dest.id)}
+            />
           ))}
         </View>
 
-        {/* Plans Section */}
+        {/* Plans Section (Testing WanderCard for Plans) */}
         <View className="mb-10">
           <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
             Seeded Travel Plans ({plans.length})
           </Text>
-          {plans.map((plan) => (
-            <View
-              key={plan.id}
-              className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-3 flex-row justify-between items-center"
-            >
-              <View className="flex-1 mr-4">
-                <Text className="font-bebas text-base text-brand-black">{plan.title}</Text>
-                <Text className="text-gray-500 font-montserrat text-xs mt-1">{plan.overview}</Text>
-                <View className="flex-row items-center justify-between mt-3">
-                  <Text className="text-[11px] text-brand-green font-montserrat-bold">
-                    Duration: {plan.duration}
-                  </Text>
-                  <Text className="text-[11px] text-gray-400 font-montserrat">
-                    Rating: {plan.rating} ⭐
-                  </Text>
-                </View>
-              </View>
-              <Pressable
-                onPress={() => togglePlanFavorite(plan.id)}
-                className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center"
-              >
-                <Ionicons
-                  name={plan.isFavorite ? "heart" : "heart-outline"}
-                  size={20}
-                  color={plan.isFavorite ? "#FF3B30" : "#9CA3AF"}
-                />
-              </Pressable>
-            </View>
-          ))}
+          <View className="gap-3">
+            {plans.map((plan) => (
+              <WanderCard
+                key={plan.id}
+                id={plan.id}
+                title={plan.title}
+                overview={plan.overview}
+                duration={plan.duration}
+                rating={plan.rating}
+                imageUri={plan.imageUri}
+                isFavorite={plan.isFavorite}
+                onPress={() => Alert.alert("Pressed", plan.title)}
+                onToggleFavorite={() => togglePlanFavorite(plan.id)}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
     </ScreenWrapper>

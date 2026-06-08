@@ -43,7 +43,7 @@ export default function WanderCard({
       }}
     >
       {/* Full-width Image Area */}
-      <View className="relative h-50">
+      <View className="relative h-48">
         <Image
           source={{ uri: imageUri }}
           className="w-full h-full"

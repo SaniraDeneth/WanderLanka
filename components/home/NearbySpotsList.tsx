@@ -4,15 +4,15 @@ import { Alert, Text, View } from "react-native";
 import { useDestinationStore } from "../../store/useDestinationStore";
 import WanderCard from "./WanderCard";
 
-export default function NearbySpotsList() {
-  console.log("NearbySpotsList rendered");
+interface NearbySpotsListProps {
+  refreshKey?: number;
+}
 
-  // Subscribe to all pieces of state that should trigger a recalculation
-  const userLatitude = useDestinationStore((s) => s.userLatitude);
-  const userLongitude = useDestinationStore((s) => s.userLongitude);
+export default function NearbySpotsList({ refreshKey = 0 }: NearbySpotsListProps) {
   const destinations = useDestinationStore((s) => s.destinations);
   const activeVibe = useDestinationStore((s) => s.activeVibe);
   const activeCategory = useDestinationStore((s) => s.activeCategory);
+  const hasLocation = useDestinationStore((s) => s.userLatitude !== null && s.userLongitude !== null);
 
   const getFilteredDestinations = useDestinationStore((s) => s.getFilteredDestinations);
   const getSortedDestinations = useDestinationStore((s) => s.getSortedDestinations);
@@ -22,8 +22,17 @@ export default function NearbySpotsList() {
   const nearbySpots = useMemo(() => {
     const filtered = getFilteredDestinations();
     const sorted = getSortedDestinations(filtered);
-    return sorted.slice(0, 2);
-  }, [destinations, activeVibe, activeCategory, userLatitude, userLongitude]);
+    return sorted.slice(0, 3);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    destinations,
+    activeVibe,
+    activeCategory,
+    refreshKey,
+    hasLocation,
+    getFilteredDestinations,
+    getSortedDestinations,
+  ]);
 
   const handleCardPress = (title: string) =>
     Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);

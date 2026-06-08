@@ -3,8 +3,8 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import CategoryCircle from "../../components/home/CategoryCircle";
 import PopularDestinationRow from "../../components/home/DestinationRow";
 import NearbySpotsList from "../../components/home/NearbySpotsList";
@@ -46,36 +46,20 @@ export default function HomeScreen() {
   const setUserLocation = useDestinationStore((s) => s.setUserLocation);
   const getFilteredDestinations = useDestinationStore((s) => s.getFilteredDestinations);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshKey((prev) => prev + 1);
+      setRefreshing(false);
+    }, 400);
+  }, []);
+
   useEffect(() => {
-    // 0s: Set Initial Location (Colombo)
+    // Set Initial Location (Colombo)
     setUserLocation(6.9271, 79.8612);
-
-    // 5s: Move 500m (Store should ignore this, no re-renders)
-    // 1 degree latitude is ~111km, so 0.0045 degrees is ~500m
-    const timer1 = setTimeout(() => {
-      console.log("--- Simulating 500m move ---");
-      setUserLocation(6.9271 + 0.0045, 79.8612);
-    }, 5000);
-
-    // 10s: Move 2km (Store accepts this, ONLY NearbySpotsList re-renders)
-    // 0.018 degrees is ~2km
-    const timer2 = setTimeout(() => {
-      console.log("--- Simulating 2km move ---");
-      setUserLocation(6.9271 + 0.018, 79.8612);
-    }, 10000);
-
-    // 15s: Move to Ella (Completely different region)
-    // Ella coordinates: ~6.8711, 81.0440
-    const timer3 = setTimeout(() => {
-      console.log("--- Simulating move to Ella ---");
-      setUserLocation(6.8711, 81.0440);
-    }, 15000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-    };
   }, [setUserLocation]);
 
   const filtered = getFilteredDestinations();
@@ -84,8 +68,6 @@ export default function HomeScreen() {
   const popularSpots = [...filtered]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 3);
-
-  console.log("HomeScreen rendered");
 
   const handleCardPress = (title: string) =>
     Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
@@ -152,6 +134,9 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
         className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6B7280" />
+        }
       >
         {/* SEARCH BAR */}
         <View>
@@ -261,7 +246,7 @@ export default function HomeScreen() {
             title="NEARBY SPOTS"
             onSeeAll={() => router.push("/explore")}
           />
-          <NearbySpotsList />
+          <NearbySpotsList refreshKey={refreshKey} />
         </View>
 
         {/* POPULAR DESTINATIONS */}

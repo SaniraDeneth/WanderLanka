@@ -1,250 +1,308 @@
+import Button from "@/components/Button";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import ScreenWrapper from "../../components/ScreenWrapper";
-import WanderCard from "../../components/home/WanderCard";
-import DestinationRow from "../../components/home/DestinationRow";
 import CategoryCircle from "../../components/home/CategoryCircle";
+import PopularDestinationRow from "../../components/home/DestinationRow";
+import SectionHeader from "../../components/home/SectionHeader";
 import VibeChip from "../../components/home/VibeChip";
-import { dbService } from "../../services/dbService";
+import WanderCard from "../../components/home/WanderCard";
 import { useDestinationStore } from "../../store/useDestinationStore";
 import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
 
+const AVATARS_MAP: Record<string, string> = {
+  person: "person-outline",
+  compass: "compass-outline",
+  camera: "camera-outline",
+  map: "map-outline",
+  globe: "globe-outline",
+  airplane: "airplane-outline",
+  bicycle: "bicycle-outline",
+  boat: "boat-outline",
+  umbrella: "umbrella-outline",
+};
+
+const VIBES = ["NATURE", "CULTURE", "ADVENTURE"];
+
+const HERO_IMAGE_URI =
+  "../../assets/images/ui/misty-mountain.png";
+
 export default function HomeScreen() {
   const router = useRouter();
-  const { profile, clearProfile } = useProfileViewModel();
+  const { profile } = useProfileViewModel();
 
-  // Zustand Store states & actions
-  const categories = useDestinationStore((state) => state.categories);
-  const destinations = useDestinationStore((state) => state.destinations);
-  const plans = useDestinationStore((state) => state.plans);
-  const loadData = useDestinationStore((state) => state.loadData);
-  const toggleFavorite = useDestinationStore((state) => state.toggleFavorite);
-  const togglePlanFavorite = useDestinationStore((state) => state.togglePlanFavorite);
-  const setUserLocation = useDestinationStore((state) => state.setUserLocation);
-  const getSortedDestinations = useDestinationStore((state) => state.getSortedDestinations);
-  const latitude = useDestinationStore((state) => state.userLatitude);
-  const longitude = useDestinationStore((state) => state.userLongitude);
+  const categories = useDestinationStore((s) => s.categories);
+  const plans = useDestinationStore((s) => s.plans);
+  const activeVibe = useDestinationStore((s) => s.activeVibe);
+  const activeCategory = useDestinationStore((s) => s.activeCategory);
+  const toggleFavorite = useDestinationStore((s) => s.toggleFavorite);
+  const togglePlanFavorite = useDestinationStore((s) => s.togglePlanFavorite);
+  const setActiveVibe = useDestinationStore((s) => s.setActiveVibe);
+  const setActiveCategory = useDestinationStore((s) => s.setActiveCategory);
+  const setUserLocation = useDestinationStore((s) => s.setUserLocation);
+  const getFilteredDestinations = useDestinationStore((s) => s.getFilteredDestinations);
+  const getSortedDestinations = useDestinationStore((s) => s.getSortedDestinations);
 
-  // Set user mock location on mount to Colombo (6.9271, 79.8612) to test Haversine sorting
+  const userLatitude = useDestinationStore((s) => s.userLatitude);
+  const userLongitude = useDestinationStore((s) => s.userLongitude);
+
   useEffect(() => {
     setUserLocation(6.9271, 79.8612);
-    console.log("latitude", latitude);
-    console.log("longitude", longitude);
   }, [setUserLocation]);
 
-  const sortedDestinations = getSortedDestinations(destinations);
+  const filtered = getFilteredDestinations();
+  const sortedByDistance = getSortedDestinations(filtered);
 
-  const handleReset = async () => {
-    try {
-      await clearProfile();
-      router.replace("/");
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const nearbySpots = sortedByDistance.slice(0, 2);
+  const popularSpots = [...sortedByDistance]
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 3);
 
-  // Insert Hikkaduwa Beach (Beaches category)
-  const handleAddHikkaduwa = async () => {
-    try {
-      const db = await dbService.getDb();
-      // Search for BEAHCES category ID
-      const categoryRow = await db.getFirstAsync<{ id: number }>(
-        "SELECT id FROM categories WHERE name = 'BEACHES';"
-      );
-      const catId = categoryRow?.id || 1;
+  const handleCardPress = (title: string) =>
+    Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
 
-      await db.runAsync(
-        `INSERT INTO destinations (title, description, category_id, vibe_tag, latitude, longitude, image_uri, rating, entry_fee, is_favorite)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);`,
-        "HIKKADUWA CORAL REEF",
-        "Famous for shallow coral reefs and wild sea turtles swimming close to the beach.",
-        catId,
-        "NATURE",
-        6.1396,
-        80.1012,
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=300",
-        4.6,
-        "FREE"
-      );
+  const handleNotificationPress = () => {
+    Alert.alert("Notifications", "No new notifications at the moment.");
+  }
 
-      await loadData();
-      Alert.alert("Success", "Inserted 'HIKKADUWA CORAL REEF' into SQLite database!");
-    } catch (error) {
-      console.error("Failed to insert dummy destination:", error);
-      Alert.alert("Error", "Could not write to SQLite.");
-    }
-  };
-
-  // Insert Adam's Peak (Mountains category)
-  const handleAddAdamsPeak = async () => {
-    try {
-      const db = await dbService.getDb();
-      const categoryRow = await db.getFirstAsync<{ id: number }>(
-        "SELECT id FROM categories WHERE name = 'MOUNTAINS';"
-      );
-      const catId = categoryRow?.id || 2;
-
-      await db.runAsync(
-        `INSERT INTO destinations (title, description, category_id, vibe_tag, latitude, longitude, image_uri, rating, entry_fee, is_favorite)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);`,
-        "ADAM'S PEAK (SRI PADA)",
-        "A sacred 2,243m peak holding the footprint of the Buddha, Shiva, or Adam depending on tradition.",
-        catId,
-        "ADVENTURE",
-        6.8096,
-        80.4994,
-        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=300",
-        4.9,
-        "FREE"
-      );
-
-      await loadData();
-      Alert.alert("Success", "Inserted 'ADAM'S PEAK' into SQLite database!");
-    } catch (error) {
-      console.error("Failed to insert dummy destination:", error);
-      Alert.alert("Error", "Could not write to SQLite.");
-    }
-  };
-
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "GOOD MORNING" : hour < 17 ? "GOOD AFTERNOON" : "GOOD EVENING";
+  console.log("user", userLatitude, userLongitude)
   return (
-    <ScreenWrapper showGradients={true}>
-      <ScrollView contentContainerStyle={{ padding: 16 }} className="flex-1">
-        {/* Header */}
-        <View className="flex-row items-center justify-between mb-6">
+    <ScreenWrapper bottomPadding={false}>
+      {/* HEADER */}
+      <View className="flex-row items-center justify-between py-3">
+        {/* Avatar + Greeting */}
+        <View className="flex-row items-center">
+          <View className="w-12 h-12 rounded-full border-2 border-brand-green bg-brand-mint items-center justify-center overflow-hidden mr-3">
+            {profile?.avatar === "camera-photo" && profile.photoUri ? (
+              <Image
+                source={{ uri: profile.photoUri }}
+                style={{ width: "100%", height: "100%" }}
+                contentFit="cover"
+              />
+            ) : profile?.avatar && AVATARS_MAP[profile.avatar] ? (
+              <Ionicons
+                name={AVATARS_MAP[profile.avatar] as any}
+                size={22}
+                color="#228B22"
+              />
+            ) : (
+              <Ionicons name="person-outline" size={22} color="#228B22" />
+            )}
+          </View>
           <View>
-            <Text className="text-gray-500 text-xs font-montserrat">HELLO, GOOD MORNING</Text>
-            <Text className="font-bebas text-3xl text-brand-black uppercase">
-              {profile?.name || "EXPLORER"}
+            <Text className="text-[10px] font-montserrat-bold tracking-widest text-gray-400 uppercase">
+              HELLO, {greeting}
+            </Text>
+            <Text className="font-bebas text-[28px] text-brand-black leading-none">
+              {profile?.name ? profile.name.toUpperCase() : "EXPLORER"}
             </Text>
           </View>
+        </View>
+
+        {/* Notification Bell */}
+        <Pressable
+          onPress={handleNotificationPress}
+          className="w-10 h-10 rounded-full items-center justify-center"
+          style={{
+            shadowColor: "#000",
+            shadowOpacity: 0.06,
+            shadowRadius: 6,
+            shadowOffset: { width: 0, height: 2 },
+          }}
+        >
+          <Ionicons name="notifications-outline" size={18} color="#1a1a1a" />
+          <View className="absolute top-2 right-2.5 w-2 h-2 bg-brand-green rounded-full border border-white" />
+        </Pressable>
+      </View>
+
+      {/*  MAIN SCROLL */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        className="flex-1"
+      >
+        {/* SEARCH BAR */}
+        <View>
           <Pressable
-            onPress={handleReset}
-            className="w-10 h-10 bg-white border border-gray-100 rounded-full items-center justify-center shadow-sm"
+            onPress={() => router.push("/explore")}
+            className="flex-row items-center bg-white border border-gray-200 rounded-2xl px-4 py-4"
+            style={{
+              shadowColor: "#000",
+              shadowOpacity: 0.04,
+              shadowRadius: 6,
+              shadowOffset: { width: 0, height: 1 },
+            }}
           >
-            <Ionicons name="log-out-outline" size={18} color="#FF3B30" />
+            <Ionicons name="search-outline" size={16} color="#9CA3AF" />
+            <Text className="flex-1 font-bebas text-xl text-gray-400 ml-2.5">
+              Search destinations...
+            </Text>
           </Pressable>
         </View>
 
-        {/* Database Control Buttons */}
-        <View className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6">
-          <Text className="font-montserrat-bold text-xs text-brand-green uppercase mb-3">
-            SQLite Controls (Add Dummy Spots)
-          </Text>
-          <View className="flex-row justify-between flex-wrap gap-2">
-            <Pressable
-              onPress={handleAddHikkaduwa}
-              className="bg-brand-green py-2.5 px-4 rounded-xl flex-1 min-w-35 items-center"
+        {/* HERO BANNER */}
+        <View className="mb-6 mt-8">
+          <View
+            className="relative overflow-hidden rounded-2xl"
+            style={{ height: 200 }}
+          >
+            <Image
+              source={require(HERO_IMAGE_URI)}
+              style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+              contentFit="cover"
+            />
+            {/* Gradient overlay */}
+            <View
+              className="absolute inset-0 flex-col items-end justify-center p-8"
+              style={{ backgroundColor: "rgba(0,0,0,0.10)" }}
             >
-              <Text className="text-brand-black font-montserrat-bold text-xs">
-                + Hikkaduwa Coral
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={handleAddAdamsPeak}
-              className="bg-brand-black py-2.5 px-4 rounded-xl flex-1 min-w-35 items-center"
-            >
-              <Text className="text-white font-montserrat-bold text-xs">
-                + Adam&apos;s Peak
-              </Text>
-            </Pressable>
+              <View>
+                <Text className="font-bebas text-3xl text-white">
+                  EXPLORE THE
+                </Text>
+                <Text className="font-bebas text-3xl text-white mb-3">MISTY MOUNTAINS</Text>
+                {/* <View className="flex-row">
+                  <View className="bg-brand-green px-5 py-2.5 rounded-full">
+                    <Text className="font-montserrat-bold text-[9px] text-brand-black uppercase tracking-widest">
+                      START EXPLORING
+                    </Text>
+                  </View>
+                </View> */}
+                <Button
+                  title="START EXPLORING"
+                  onPress={() => router.push("/explore")}
+                  className="bg-brand-green px-6 py-2"
+                  textClassName="text-2xl tracking-normal"
+                />
+              </View>
+            </View>
           </View>
         </View>
 
-        {/* Vibe Chips Test Section */}
-        <View className="mb-6">
-          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
-            Testing Vibe Chips
+        {/* SELECT YOUR VIBE */}
+        <View className="mb-5">
+          <Text className="font-bebas text-2xl text-brand-black mb-3">
+            SELECT YOUR VIBE
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            <VibeChip label="NATURE" isActive={true} onPress={() => {}} />
-            <VibeChip label="CULTURE" isActive={false} onPress={() => {}} />
-            <VibeChip label="ADVENTURE" isActive={false} onPress={() => {}} />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {VIBES.map((vibe) => (
+              <VibeChip
+                key={vibe}
+                label={vibe}
+                isActive={activeVibe?.toUpperCase() === vibe}
+                onPress={() => setActiveVibe(vibe)}
+              />
+            ))}
           </ScrollView>
         </View>
 
-        {/* Categories Section */}
-        <View className="mb-6">
-          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
-            Seeded Categories ({categories.length})
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+        {/* CATEGORY */}
+        <View className="mb-8">
+          <SectionHeader
+            title="CATEGORY"
+            onSeeAll={() => router.push("/explore")}
+          />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
+          >
             {categories.map((cat) => (
               <CategoryCircle
                 key={cat.id}
                 name={cat.name}
                 imageUri={cat.imageUri}
-                isActive={false}
-                onPress={() => {}}
+                isActive={activeCategory === cat.id}
+                onPress={() => setActiveCategory(cat.id)}
               />
             ))}
           </ScrollView>
         </View>
 
-        {/* Destinations Section (Testing DestinationRow) */}
-        <View className="mb-6">
-          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-1">
-            Seeded Destinations ({destinations.length})
-          </Text>
-          <Text className="text-gray-400 text-[10px] font-montserrat mb-3">
-            Testing DestinationRow & WanderCard
-          </Text>
+        {/* NEARBY SPOTS */}
+        <View className="mb-5 ">
+          <SectionHeader
+            title="NEARBY SPOTS"
+            onSeeAll={() => router.push("/explore")}
+          />
+          {nearbySpots.length === 0 ? (
+            <View className="bg-white p-6 rounded-3xl items-center border border-gray-100">
+              <Ionicons name="compass-outline" size={28} color="#D1D5DB" />
+              <Text className="font-montserrat text-xs text-gray-400 mt-2 text-center">
+                No spots match your current filters.
+              </Text>
+            </View>
+          ) : (
+            nearbySpots.map((spot) => (
+              <WanderCard
+                key={spot.id}
+                id={spot.id}
+                title={spot.title}
+                imageUri={spot.imageUri}
+                rating={spot.rating}
+                distance={spot.distance}
+                entryFee={spot.entryFee}
+                isFavorite={spot.isFavorite}
+                onPress={() => handleCardPress(spot.title)}
+                onToggleFavorite={() => toggleFavorite(spot.id)}
+              />
+            ))
+          )}
+        </View>
 
-          {sortedDestinations.slice(0, 2).map((dest) => (
-            <WanderCard
-              key={dest.id}
-              id={dest.id}
-              title={dest.title}
-              imageUri={dest.imageUri}
-              rating={dest.rating}
-              distance={dest.distance}
-              entryFee={dest.entryFee}
-              isFavorite={dest.isFavorite}
-              onPress={() => Alert.alert("Pressed", dest.title)}
-              onToggleFavorite={() => toggleFavorite(dest.id)}
-            />
-          ))}
-
-          {sortedDestinations.slice(2).map((dest) => (
-            <DestinationRow
-              key={dest.id}
-              id={dest.id}
-              title={dest.title}
-              imageUri={dest.imageUri}
-              rating={dest.rating}
-              vibeTag={dest.vibeTag}
-              isFavorite={dest.isFavorite}
-              onPress={() => Alert.alert("Pressed", dest.title)}
-              onToggleFavorite={() => toggleFavorite(dest.id)}
+        {/* POPULAR DESTINATIONS */}
+        <View className="mb-5">
+          <SectionHeader
+            title="POPULAR DESTINATIONS"
+            onSeeAll={() => router.push("/explore")}
+          />
+          {popularSpots.map((spot) => (
+            <PopularDestinationRow
+              key={spot.id}
+              id={spot.id}
+              title={spot.title}
+              imageUri={spot.imageUri}
+              rating={spot.rating}
+              vibeTag={spot.vibeTag}
+              isFavorite={spot.isFavorite}
+              onPress={() => handleCardPress(spot.title)}
+              onToggleFavorite={() => toggleFavorite(spot.id)}
             />
           ))}
         </View>
 
-        {/* Plans Section (Testing WanderCard for Plans) */}
-        <View className="mb-10">
-          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
-            Seeded Travel Plans ({plans.length})
-          </Text>
-          <View className="gap-3">
-            {plans.map((plan) => (
-              <WanderCard
-                key={plan.id}
-                id={plan.id}
-                title={plan.title}
-                overview={plan.overview}
-                duration={plan.duration}
-                rating={plan.rating}
-                imageUri={plan.imageUri}
-                isFavorite={plan.isFavorite}
-                onPress={() => Alert.alert("Pressed", plan.title)}
-                onToggleFavorite={() => togglePlanFavorite(plan.id)}
-              />
-            ))}
-          </View>
+        {/* DISCOVER PLANS */}
+        <View>
+          <SectionHeader
+            title="DISCOVER PLANS"
+            onSeeAll={() => router.push("/explore")}
+          />
+          {plans.map((plan) => (
+            <WanderCard
+              key={plan.id}
+              id={plan.id}
+              title={plan.title}
+              overview={plan.overview}
+              duration={plan.duration}
+              rating={plan.rating}
+              imageUri={plan.imageUri}
+              isFavorite={plan.isFavorite}
+              onPress={() => handleCardPress(plan.title)}
+              onToggleFavorite={() => togglePlanFavorite(plan.id)}
+            />
+          ))}
         </View>
       </ScrollView>
     </ScreenWrapper>
   );
 }
-

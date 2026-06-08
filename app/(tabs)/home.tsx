@@ -7,6 +7,7 @@ import React, { useEffect } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import CategoryCircle from "../../components/home/CategoryCircle";
 import PopularDestinationRow from "../../components/home/DestinationRow";
+import NearbySpotsList from "../../components/home/NearbySpotsList";
 import SectionHeader from "../../components/home/SectionHeader";
 import VibeChip from "../../components/home/VibeChip";
 import WanderCard from "../../components/home/WanderCard";
@@ -44,22 +45,47 @@ export default function HomeScreen() {
   const setActiveCategory = useDestinationStore((s) => s.setActiveCategory);
   const setUserLocation = useDestinationStore((s) => s.setUserLocation);
   const getFilteredDestinations = useDestinationStore((s) => s.getFilteredDestinations);
-  const getSortedDestinations = useDestinationStore((s) => s.getSortedDestinations);
-
-  const userLatitude = useDestinationStore((s) => s.userLatitude);
-  const userLongitude = useDestinationStore((s) => s.userLongitude);
 
   useEffect(() => {
+    // 0s: Set Initial Location (Colombo)
     setUserLocation(6.9271, 79.8612);
+
+    // 5s: Move 500m (Store should ignore this, no re-renders)
+    // 1 degree latitude is ~111km, so 0.0045 degrees is ~500m
+    const timer1 = setTimeout(() => {
+      console.log("--- Simulating 500m move ---");
+      setUserLocation(6.9271 + 0.0045, 79.8612);
+    }, 5000);
+
+    // 10s: Move 2km (Store accepts this, ONLY NearbySpotsList re-renders)
+    // 0.018 degrees is ~2km
+    const timer2 = setTimeout(() => {
+      console.log("--- Simulating 2km move ---");
+      setUserLocation(6.9271 + 0.018, 79.8612);
+    }, 10000);
+
+    // 15s: Move to Ella (Completely different region)
+    // Ella coordinates: ~6.8711, 81.0440
+    const timer3 = setTimeout(() => {
+      console.log("--- Simulating move to Ella ---");
+      setUserLocation(6.8711, 81.0440);
+    }, 15000);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
   }, [setUserLocation]);
 
   const filtered = getFilteredDestinations();
-  const sortedByDistance = getSortedDestinations(filtered);
 
-  const nearbySpots = sortedByDistance.slice(0, 2);
-  const popularSpots = [...sortedByDistance]
+  // Decoupled Popular Spots: sort filtered list directly by rating
+  const popularSpots = [...filtered]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 3);
+
+  console.log("HomeScreen rendered");
 
   const handleCardPress = (title: string) =>
     Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
@@ -71,7 +97,7 @@ export default function HomeScreen() {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "GOOD MORNING" : hour < 17 ? "GOOD AFTERNOON" : "GOOD EVENING";
-  console.log("user", userLatitude, userLongitude)
+
   return (
     <ScreenWrapper bottomPadding={false}>
       {/* HEADER */}
@@ -235,29 +261,7 @@ export default function HomeScreen() {
             title="NEARBY SPOTS"
             onSeeAll={() => router.push("/explore")}
           />
-          {nearbySpots.length === 0 ? (
-            <View className="bg-white p-6 rounded-3xl items-center border border-gray-100">
-              <Ionicons name="compass-outline" size={28} color="#D1D5DB" />
-              <Text className="font-montserrat text-xs text-gray-400 mt-2 text-center">
-                No spots match your current filters.
-              </Text>
-            </View>
-          ) : (
-            nearbySpots.map((spot) => (
-              <WanderCard
-                key={spot.id}
-                id={spot.id}
-                title={spot.title}
-                imageUri={spot.imageUri}
-                rating={spot.rating}
-                distance={spot.distance}
-                entryFee={spot.entryFee}
-                isFavorite={spot.isFavorite}
-                onPress={() => handleCardPress(spot.title)}
-                onToggleFavorite={() => toggleFavorite(spot.id)}
-              />
-            ))
-          )}
+          <NearbySpotsList />
         </View>
 
         {/* POPULAR DESTINATIONS */}

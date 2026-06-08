@@ -155,6 +155,14 @@ export const useDestinationStore = create<DestinationState>((set, get) => ({
   },
 
   setUserLocation: (latitude: number, longitude: number) => {
+    const { userLatitude, userLongitude } = get();
+    if (userLatitude !== null && userLongitude !== null) {
+      const distance = getHaversineDistance(userLatitude, userLongitude, latitude, longitude);
+      if (distance < 1) {
+        console.log(`[Store] Movement is < 1km (${distance.toFixed(2)}km). Ignoring location update.`);
+        return;
+      }
+    }
     set({ userLatitude: latitude, userLongitude: longitude });
   },
 

@@ -7,6 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import BrandLoader from "../components/BrandLoader";
 import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
+import { useDestinationStore } from "../store/useDestinationStore";
 import "./global.css";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -41,15 +42,18 @@ export default function RootLayout() {
 
 function RootLayoutContent() {
   const { profile, loading: profileLoading, reloadProfile } = useProfileViewModel();
+  const initDatabase = useDestinationStore((state) => state.initDatabase);
+  const dbLoading = useDestinationStore((state) => state.loading);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
     reloadProfile();
-  }, [reloadProfile]);
+    initDatabase();
+  }, [reloadProfile, initDatabase]);
 
   useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || dbLoading) return;
 
     const isAtWelcomeOrOnboarding = pathname === "/" || pathname === "/onboarding";
 
@@ -62,11 +66,12 @@ function RootLayoutContent() {
         router.replace("/");
       }
     }
-  }, [profile, profileLoading, pathname, router]);
+  }, [profile, profileLoading, dbLoading, pathname, router]);
 
-  if (profileLoading) {
+  if (profileLoading || dbLoading) {
     return <BrandLoader className="flex-1 bg-brand-offwhite" />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
+

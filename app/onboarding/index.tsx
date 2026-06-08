@@ -1,13 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -17,6 +12,7 @@ import {
 } from "react-native";
 import Button from "../../components/Button";
 import ScreenWrapper from "../../components/ScreenWrapper";
+import { useOnboardingViewModel } from "../../viewmodels/useOnboardingViewModel";
 
 const AVATARS = [
   { id: "person", icon: "person-outline", label: "Traveler" },
@@ -31,148 +27,19 @@ const AVATARS = [
 ];
 
 export default function OnboardingScreen() {
-  const router = useRouter();
-
-  // Onboarding Steps State
-  const [step, setStep] = useState<1 | 2>(1);
-
-  // Profile Data State
-  const [name, setName] = useState("");
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Transitions
-  const handleNextStep = () => {
-    if (!name.trim()) {
-      Alert.alert("Required", "Please enter your name to continue.");
-      return;
-    }
-    setStep(2);
-  };
-
-  const handleBackStep = () => {
-    setStep(1);
-  };
-
-  // Photo Source Selection Alert
-  const handleTakePhoto = () => {
-    Alert.alert(
-      "Profile Photo",
-      "Select a source for your photo:",
-      [
-        {
-          text: "Take Photo",
-          onPress: launchCamera,
-        },
-        {
-          text: "Choose from Library",
-          onPress: launchLibrary,
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const launchCamera = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "WanderLanka needs camera permissions to take a profile picture. Please enable it in settings.",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Linking.openSettings() }
-          ]
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-        cameraType: ImagePicker.CameraType.front,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setSelectedAvatar("camera-photo");
-        setPhotoUri(result.assets[0].uri);
-        Alert.alert("Success", "Profile photo successfully updated!");
-      }
-    } catch (error) {
-      console.error("Error launching camera:", error);
-      Alert.alert("Error", "Could not launch camera. Please try again.");
-    }
-  };
-
-  const launchLibrary = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "WanderLanka needs photo library permissions to select a profile picture. Please enable it in settings.",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Linking.openSettings() }
-          ]
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setSelectedAvatar("camera-photo");
-        setPhotoUri(result.assets[0].uri);
-        Alert.alert("Success", "Profile photo successfully updated!");
-      }
-    } catch (error) {
-      console.error("Error launching library:", error);
-      Alert.alert("Error", "Could not open photo library. Please try again.");
-    }
-  };
-
-  // Finish Onboarding Setup
-  const handleFinishSetup = async () => {
-    if (!selectedAvatar) {
-      Alert.alert("Required", "Please select a badge or capture a photo.");
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const profileData = {
-        name: name.trim(),
-        avatar: selectedAvatar,
-        photoUri: photoUri,
-        onboarded: true,
-      };
-
-      await AsyncStorage.setItem("user_profile", JSON.stringify(profileData));
-      console.log("Onboarding Saved Data:", profileData);
-
-      setIsSaving(false);
-
-      // Navigate to home dashboard
-      router.replace("/home");
-    } catch (error) {
-      console.error("Error saving profile details:", error);
-      setIsSaving(false);
-      Alert.alert("Error", "Could not complete onboarding. Please try again.");
-    }
-  };
+  const {
+    step,
+    name,
+    setName,
+    selectedAvatar,
+    setSelectedAvatar,
+    setPhotoUri,
+    isSaving,
+    handleNextStep,
+    handleBackStep,
+    handleTakePhoto,
+    handleFinishSetup,
+  } = useOnboardingViewModel();
 
   return (
     <ScreenWrapper showGradients={true}>

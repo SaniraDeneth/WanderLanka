@@ -1,16 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
+import React from "react";
+import { Image, Pressable, Text, View } from "react-native";
+import BrandLoader from "../components/BrandLoader";
 import Button from "../components/Button";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
 
-interface Profile {
-  name: string;
-  avatar: string;
-  photoUri: string | null;
-}
+
 
 const AVATARS_MAP: Record<string, { icon: string; label: string }> = {
   person: { icon: "person-outline", label: "Traveler" },
@@ -26,31 +23,11 @@ const AVATARS_MAP: Record<string, { icon: string; label: string }> = {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<Profile | null>(null);
-
-  const loadProfile = useCallback(async () => {
-    try {
-      const stored = await AsyncStorage.getItem("user_profile");
-      if (stored) {
-        setProfile(JSON.parse(stored));
-      } else {
-        router.replace("/onboarding");
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
-
-  useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
+  const { profile, loading, clearProfile } = useProfileViewModel();
 
   const handleReset = async () => {
     try {
-      await AsyncStorage.removeItem("user_profile");
+      await clearProfile();
       router.replace("/");
     } catch (e) {
       console.error(e);
@@ -60,9 +37,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <ScreenWrapper showGradients={true}>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#000000" />
-        </View>
+        <BrandLoader className="flex-1" />
       </ScreenWrapper>
     );
   }
@@ -71,7 +46,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenWrapper showGradients={true}>
-      <View className="flex-grow justify-between p-2">
+      <View className="grow justify-between p-2">
         {/* Top Header */}
         <View className="flex-row items-center justify-between mt-4">
           <View className="w-10 h-10" />

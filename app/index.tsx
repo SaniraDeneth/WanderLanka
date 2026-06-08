@@ -1,11 +1,14 @@
 import Button from "@/components/Button";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, View } from "react-native";
 import ScreenWrapper from "../components/ScreenWrapper";
 
 export default function WelcomeScreen() {
+  const router = useRouter();
+
   const handleGetStarted = () => {
-    console.log("Get started pressed!");
+    router.push("/onboarding");
   };
 
   return (

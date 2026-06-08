@@ -9,7 +9,7 @@ interface ScreenWrapperProps {
 
 export default function ScreenWrapper({ children, showGradients = true }: ScreenWrapperProps) {
   return (
-    <View className="flex-1 bg-brand-mint">
+    <View className="flex-1 bg-brand-offwhite">
       {/* SVG BACKGROUND OVERLAYS */}
       {showGradients && (
         <View className="absolute inset-0 z-0 pointer-events-none">

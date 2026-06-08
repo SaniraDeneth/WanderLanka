@@ -1,29 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Image, Pressable, Text, View } from "react-native";
-import BrandLoader from "../components/BrandLoader";
-import Button from "../components/Button";
+import React, { useEffect } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { dbService } from "../services/dbService";
+import { useDestinationStore } from "../store/useDestinationStore";
 import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
-
-
-
-const AVATARS_MAP: Record<string, { icon: string; label: string }> = {
-  person: { icon: "person-outline", label: "Traveler" },
-  compass: { icon: "compass-outline", label: "Explorer" },
-  camera: { icon: "camera-outline", label: "Shutterbug" },
-  map: { icon: "map-outline", label: "Backpacker" },
-  globe: { icon: "globe-outline", label: "Nomad" },
-  airplane: { icon: "airplane-outline", label: "Flyer" },
-  bicycle: { icon: "bicycle-outline", label: "Cyclist" },
-  boat: { icon: "boat-outline", label: "Sailor" },
-  umbrella: { icon: "umbrella-outline", label: "Vacationer" },
-};
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { profile, loading, clearProfile } = useProfileViewModel();
+  const { profile, clearProfile } = useProfileViewModel();
+
+  // Zustand Store states & actions
+  const categories = useDestinationStore((state) => state.categories);
+  const destinations = useDestinationStore((state) => state.destinations);
+  const plans = useDestinationStore((state) => state.plans);
+  const loadData = useDestinationStore((state) => state.loadData);
+  const toggleFavorite = useDestinationStore((state) => state.toggleFavorite);
+  const togglePlanFavorite = useDestinationStore((state) => state.togglePlanFavorite);
+  const setUserLocation = useDestinationStore((state) => state.setUserLocation);
+  const getSortedDestinations = useDestinationStore((state) => state.getSortedDestinations);
+
+  // Set user mock location on mount to Colombo (6.9271, 79.8612) to test Haversine sorting
+  useEffect(() => {
+    setUserLocation(6.9271, 79.8612);
+  }, [setUserLocation]);
+
+  const sortedDestinations = getSortedDestinations(destinations);
 
   const handleReset = async () => {
     try {
@@ -34,101 +37,217 @@ export default function HomeScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <ScreenWrapper showGradients={true}>
-        <BrandLoader className="flex-1" />
-      </ScreenWrapper>
-    );
-  }
+  // Insert Hikkaduwa Beach (Beaches category)
+  const handleAddHikkaduwa = async () => {
+    try {
+      const db = await dbService.getDb();
+      // Search for BEAHCES category ID
+      const categoryRow = await db.getFirstAsync<{ id: number }>(
+        "SELECT id FROM categories WHERE name = 'BEACHES';"
+      );
+      const catId = categoryRow?.id || 1;
 
-  const avatarInfo = profile?.avatar ? AVATARS_MAP[profile.avatar] : null;
+      await db.runAsync(
+        `INSERT INTO destinations (title, description, category_id, vibe_tag, latitude, longitude, image_uri, rating, entry_fee, is_favorite)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);`,
+        "HIKKADUWA CORAL REEF",
+        "Famous for shallow coral reefs and wild sea turtles swimming close to the beach.",
+        catId,
+        "NATURE",
+        6.1396,
+        80.1012,
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=300",
+        4.6,
+        "FREE"
+      );
+
+      await loadData();
+      Alert.alert("Success", "Inserted 'HIKKADUWA CORAL REEF' into SQLite database!");
+    } catch (error) {
+      console.error("Failed to insert dummy destination:", error);
+      Alert.alert("Error", "Could not write to SQLite.");
+    }
+  };
+
+  // Insert Adam's Peak (Mountains category)
+  const handleAddAdamsPeak = async () => {
+    try {
+      const db = await dbService.getDb();
+      const categoryRow = await db.getFirstAsync<{ id: number }>(
+        "SELECT id FROM categories WHERE name = 'MOUNTAINS';"
+      );
+      const catId = categoryRow?.id || 2;
+
+      await db.runAsync(
+        `INSERT INTO destinations (title, description, category_id, vibe_tag, latitude, longitude, image_uri, rating, entry_fee, is_favorite)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);`,
+        "ADAM'S PEAK (SRI PADA)",
+        "A sacred 2,243m peak holding the footprint of the Buddha, Shiva, or Adam depending on tradition.",
+        catId,
+        "ADVENTURE",
+        6.8096,
+        80.4994,
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=300",
+        4.9,
+        "FREE"
+      );
+
+      await loadData();
+      Alert.alert("Success", "Inserted 'ADAM'S PEAK' into SQLite database!");
+    } catch (error) {
+      console.error("Failed to insert dummy destination:", error);
+      Alert.alert("Error", "Could not write to SQLite.");
+    }
+  };
 
   return (
     <ScreenWrapper showGradients={true}>
-      <View className="grow justify-between p-2">
-        {/* Top Header */}
-        <View className="flex-row items-center justify-between mt-4">
-          <View className="w-10 h-10" />
-          <Text className="font-bebas text-2xl tracking-widest text-brand-black">
-            WANDER<Text className="text-brand-green">LANKA</Text>
-          </Text>
+      <ScrollView contentContainerStyle={{ padding: 16 }} className="flex-1">
+        {/* Header */}
+        <View className="flex-row items-center justify-between mb-6">
+          <View>
+            <Text className="text-gray-500 text-xs font-montserrat">HELLO, GOOD MORNING</Text>
+            <Text className="font-bebas text-3xl text-brand-black uppercase">
+              {profile?.name || "EXPLORER"}
+            </Text>
+          </View>
           <Pressable
             onPress={handleReset}
-            className="w-10 h-10 bg-white border border-gray-100 rounded-full items-center justify-center active:scale-[0.95] shadow-sm"
+            className="w-10 h-10 bg-white border border-gray-100 rounded-full items-center justify-center shadow-sm"
           >
             <Ionicons name="log-out-outline" size={18} color="#FF3B30" />
           </Pressable>
         </View>
 
-        {/* Profile Card Section */}
-        <View className="flex-1 items-center justify-center my-10">
-          <View className="bg-white rounded-3xl p-8 w-full shadow-lg shadow-black/5 border border-gray-100/50 items-center">
-            {/* Avatar Frame */}
-            <View className="relative mb-6">
-              <View className="w-32 h-32 rounded-full bg-brand-green/10 border-4 border-brand-green items-center justify-center overflow-hidden">
-                {profile?.avatar === "camera-photo" && profile.photoUri ? (
-                  <Image
-                    source={{ uri: profile.photoUri }}
-                    className="w-full h-full"
-                    resizeMode="cover"
-                  />
-                ) : avatarInfo ? (
-                  <Ionicons name={avatarInfo.icon as any} size={60} color="#A8D030" />
-                ) : (
-                  <Ionicons name="person-outline" size={60} color="#A8D030" />
-                )}
-              </View>
-
-              {/* Status Badge */}
-              <View className="absolute bottom-1 right-1 bg-brand-black w-8 h-8 rounded-full border-2 border-white items-center justify-center">
-                <Ionicons name="shield-checkmark" size={14} color="#A8D030" />
-              </View>
-            </View>
-
-            {/* Traveler Welcome Message */}
-            <Text className="font-montserrat-bold text-xs text-brand-green uppercase tracking-widest mb-1">
-              Verified Sri Lankan Explorer
-            </Text>
-
-            <Text className="font-bebas text-5xl text-brand-black text-center mt-2 tracking-wide">
-              AYUBOWAN, {profile?.name ? profile.name.toUpperCase() : "EXPLORER"}!
-            </Text>
-
-            <Text className="font-montserrat text-sm text-gray-500 mt-3 text-center leading-relaxed max-w-[85%]">
-              Welcome to the Pearl of the Indian Ocean. Your personalized itinerary is being generated.
-            </Text>
-
-            {/* Profile badge info */}
-            {avatarInfo && (
-              <View className="bg-gray-50 px-4 py-2 rounded-full border border-gray-100/80 mt-6 flex-row items-center">
-                <Ionicons name={avatarInfo.icon as any} size={14} color="#6B7280" />
-                <Text className="font-montserrat-bold text-[10px] text-gray-500 uppercase tracking-widest ml-2">
-                  Role: {avatarInfo.label}
-                </Text>
-              </View>
-            )}
-
-            {profile?.avatar === "camera-photo" && (
-              <View className="bg-gray-50 px-4 py-2 rounded-full border border-gray-100/80 mt-6 flex-row items-center">
-                <Ionicons name="camera-outline" size={14} color="#6B7280" />
-                <Text className="font-montserrat-bold text-[10px] text-gray-500 uppercase tracking-widest ml-2">
-                  Role: Custom Photo
-                </Text>
-              </View>
-            )}
+        {/* Database Control Buttons */}
+        <View className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6">
+          <Text className="font-montserrat-bold text-xs text-brand-green uppercase mb-3">
+            SQLite Controls (Add Dummy Spots)
+          </Text>
+          <View className="flex-row justify-between flex-wrap gap-2">
+            <Pressable
+              onPress={handleAddHikkaduwa}
+              className="bg-brand-green py-2.5 px-4 rounded-xl flex-1 min-w-35 items-center"
+            >
+              <Text className="text-brand-black font-montserrat-bold text-xs">
+                + Hikkaduwa Coral
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleAddAdamsPeak}
+              className="bg-brand-black py-2.5 px-4 rounded-xl flex-1 min-w-35 items-center"
+            >
+              <Text className="text-white font-montserrat-bold text-xs">
+                + Adam&apos;s Peak
+              </Text>
+            </Pressable>
           </View>
         </View>
 
-        {/* Footer Actions */}
-        <View className="mb-4">
-          <Button
-            title="RESET SETUP"
-            onPress={handleReset}
-            className="bg-brand-black"
-          />
+        {/* Categories Section */}
+        <View className="mb-6">
+          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
+            Seeded Categories ({categories.length})
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+            {categories.map((cat) => (
+              <View
+                key={cat.id}
+                className="bg-white border border-gray-100 rounded-full py-1.5 px-4 mr-2"
+              >
+                <Text className="font-montserrat text-xs text-brand-black">{cat.name}</Text>
+              </View>
+            ))}
+          </ScrollView>
         </View>
-      </View>
+
+        {/* Destinations Section */}
+        <View className="mb-6">
+          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-1">
+            Seeded Destinations ({destinations.length})
+          </Text>
+          <Text className="text-gray-400 text-[10px] font-montserrat mb-3">
+            Sorted by Haversine distance from Colombo (6.9271° N, 79.8612° E)
+          </Text>
+
+          {sortedDestinations.map((dest) => (
+            <View
+              key={dest.id}
+              className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-3 flex-row justify-between items-center"
+            >
+              <View className="flex-1 mr-4">
+                <Text className="font-bebas text-base text-brand-black">{dest.title}</Text>
+                <Text className="text-gray-500 font-montserrat text-xs mt-1" numberOfLines={2}>
+                  {dest.description}
+                </Text>
+                <View className="flex-row items-center mt-2 flex-wrap gap-2">
+                  <View className="bg-gray-100 px-2 py-0.5 rounded-md">
+                    <Text className="text-[10px] text-gray-600 font-montserrat-bold uppercase">
+                      {dest.vibeTag}
+                    </Text>
+                  </View>
+                  <Text className="text-[11px] text-brand-green font-montserrat-bold">
+                    {dest.rating} ⭐
+                  </Text>
+                  <Text className="text-[11px] text-gray-400 font-montserrat">
+                    ~{dest.distance} KM away
+                  </Text>
+                  <Text className="text-[11px] text-gray-400 font-montserrat-bold">
+                    • {dest.entryFee}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => toggleFavorite(dest.id)}
+                className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center"
+              >
+                <Ionicons
+                  name={dest.isFavorite ? "heart" : "heart-outline"}
+                  size={20}
+                  color={dest.isFavorite ? "#FF3B30" : "#9CA3AF"}
+                />
+              </Pressable>
+            </View>
+          ))}
+        </View>
+
+        {/* Plans Section */}
+        <View className="mb-10">
+          <Text className="font-bebas text-lg tracking-wider text-brand-black mb-3">
+            Seeded Travel Plans ({plans.length})
+          </Text>
+          {plans.map((plan) => (
+            <View
+              key={plan.id}
+              className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-3 flex-row justify-between items-center"
+            >
+              <View className="flex-1 mr-4">
+                <Text className="font-bebas text-base text-brand-black">{plan.title}</Text>
+                <Text className="text-gray-500 font-montserrat text-xs mt-1">{plan.overview}</Text>
+                <View className="flex-row items-center justify-between mt-3">
+                  <Text className="text-[11px] text-brand-green font-montserrat-bold">
+                    Duration: {plan.duration}
+                  </Text>
+                  <Text className="text-[11px] text-gray-400 font-montserrat">
+                    Rating: {plan.rating} ⭐
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => togglePlanFavorite(plan.id)}
+                className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center"
+              >
+                <Ionicons
+                  name={plan.isFavorite ? "heart" : "heart-outline"}
+                  size={20}
+                  color={plan.isFavorite ? "#FF3B30" : "#9CA3AF"}
+                />
+              </Pressable>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </ScreenWrapper>
   );
 }
+

@@ -6,8 +6,8 @@ import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import BrandLoader from "../components/BrandLoader";
-import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
 import { useDestinationStore } from "../store/useDestinationStore";
+import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
 import "./global.css";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -59,10 +59,11 @@ function RootLayoutContent() {
 
     if (profile?.onboarded) {
       if (isAtWelcomeOrOnboarding) {
-        router.replace("/home");
+        router.replace("/(tabs)/home");
       }
     } else {
-      if (pathname === "/home") {
+      // Redirect to welcome from any screen that isn't the welcome/onboarding flow
+      if (!isAtWelcomeOrOnboarding) {
         router.replace("/");
       }
     }

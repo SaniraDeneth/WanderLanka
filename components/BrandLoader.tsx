@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Animated } from "react-native";
+import { Animated, Text, View } from "react-native";
 
 interface BrandLoaderProps {
   className?: string;
@@ -27,12 +27,11 @@ export default function BrandLoader({ className = "", size = "large" }: BrandLoa
   }, [fadeAnim]);
 
   const textSizeClass = size === "small" ? "text-4xl" : "text-7xl";
-  const letterSpacingClass = size === "small" ? "tracking-[2px]" : "tracking-[4px]";
 
   return (
     <View className={`items-center justify-center ${className}`}>
       <Animated.View style={{ opacity: fadeAnim }}>
-        <Text className={`font-bebas ${textSizeClass} ${letterSpacingClass} text-brand-black text-center`}>
+        <Text className={`font-bebas ${textSizeClass} text-brand-black text-center`}>
           W<Text className="text-brand-green">LANKA</Text>
         </Text>
       </Animated.View>

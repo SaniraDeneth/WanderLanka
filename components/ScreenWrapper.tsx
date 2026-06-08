@@ -5,9 +5,10 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 interface ScreenWrapperProps {
   children: React.ReactNode;
   showGradients?: boolean;
+  bottomPadding?: boolean;
 }
 
-export default function ScreenWrapper({ children, showGradients = true }: ScreenWrapperProps) {
+export default function ScreenWrapper({ children, showGradients = true, bottomPadding = true }: ScreenWrapperProps) {
   return (
     <View className="flex-1 bg-brand-offwhite">
       {/* SVG BACKGROUND OVERLAYS */}
@@ -47,7 +48,7 @@ export default function ScreenWrapper({ children, showGradients = true }: Screen
       )}
 
       {/* Main Content Area */}
-      <View className="flex-1 z-10 px-4 pt-safe pb-safe">
+      <View className={`flex-1 z-10 px-4 pt-safe ${bottomPadding ? "pb-safe" : ""}`}>
         {children}
       </View>
     </View>

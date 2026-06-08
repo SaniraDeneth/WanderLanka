@@ -2,10 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import ScreenWrapper from "../components/ScreenWrapper";
-import { dbService } from "../services/dbService";
-import { useDestinationStore } from "../store/useDestinationStore";
-import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
+import ScreenWrapper from "../../components/ScreenWrapper";
+import { dbService } from "../../services/dbService";
+import { useDestinationStore } from "../../store/useDestinationStore";
+import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -20,10 +20,14 @@ export default function HomeScreen() {
   const togglePlanFavorite = useDestinationStore((state) => state.togglePlanFavorite);
   const setUserLocation = useDestinationStore((state) => state.setUserLocation);
   const getSortedDestinations = useDestinationStore((state) => state.getSortedDestinations);
+  const latitude = useDestinationStore((state) => state.userLatitude);
+  const longitude = useDestinationStore((state) => state.userLongitude);
 
   // Set user mock location on mount to Colombo (6.9271, 79.8612) to test Haversine sorting
   useEffect(() => {
     setUserLocation(6.9271, 79.8612);
+    console.log("latitude", latitude);
+    console.log("longitude", longitude);
   }, [setUserLocation]);
 
   const sortedDestinations = getSortedDestinations(destinations);

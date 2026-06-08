@@ -64,7 +64,7 @@ export default function OnboardingScreen() {
             ) : (
               <View className="w-10 h-10" />
             )}
-            <Text className="font-bebas text-2xl tracking-widest text-brand-black">
+            <Text className="font-bebas text-2xl text-brand-black">
               WANDER<Text className="text-brand-green">LANKA</Text>
             </Text>
             <View className="w-10 h-10" />
@@ -88,7 +88,7 @@ export default function OnboardingScreen() {
             /* STEP 1: Name Input Screen */
             <View className="flex-1 justify-between">
               <View>
-                <Text className="font-bebas text-5xl text-brand-black tracking-wide leading-tight">
+                <Text className="font-bebas text-5xl text-brand-black leading-tight">
                   TELL US YOUR NAME
                 </Text>
                 <Text className="font-montserrat text-sm text-gray-500 mt-2 leading-relaxed">
@@ -125,7 +125,7 @@ export default function OnboardingScreen() {
             /* STEP 2: Profile Picture Selection Grid */
             <View className="flex-1 justify-between">
               <View>
-                <Text className="font-bebas text-5xl text-brand-black tracking-wide leading-tight">
+                <Text className="font-bebas text-5xl text-brand-black leading-tight">
                   CHOOSE A PROFILE PICTURE
                 </Text>
                 <Text className="font-montserrat text-sm text-gray-500 mt-2 leading-relaxed">

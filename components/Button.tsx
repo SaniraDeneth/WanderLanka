@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, Text } from "react-native";
+import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
   title: string;
@@ -20,21 +21,14 @@ export default function Button({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={`
-        w-full items-center justify-center
-        bg-brand-black py-4 px-8 rounded-lg
-        shadow shadow-black/10
-        active:scale-[0.98] active:opacity-90
-        ${disabled ? "opacity-50" : "opacity-100"}
-        ${className}
-      `}
+      className={twMerge(
+        "w-full items-center justify-center py-4 px-8 rounded-lg",
+        "bg-brand-black shadow shadow-black/10 active:scale-[0.98] active:opacity-90",
+        disabled ? "opacity-50" : "opacity-100",
+        className
+      )}
     >
-      <Text
-        className={`
-          font-bebas text-4xl text-white tracking-[1.5px]
-          ${textClassName}
-        `}
-      >
+      <Text className={twMerge("font-bebas text-4xl text-white", textClassName)}>
         {title}
       </Text>
     </Pressable>

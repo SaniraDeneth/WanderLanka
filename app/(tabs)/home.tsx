@@ -19,6 +19,7 @@ import {
   usePopularDestinations,
 } from "../../viewmodels/useDestinationViewModel";
 import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
+import { useFilterStore } from "../../store/useFilterStore";
 
 const AVATARS_MAP: Record<string, string> = {
   person: "person-outline",
@@ -57,6 +58,12 @@ export default function HomeScreen() {
   const popularSpots = usePopularDestinations();
   const plans = useDiscoverPlans();
 
+  const setExploreActiveTab = useFilterStore((s) => s.setExploreActiveTab);
+  const setExploreSpotsMinRating = useFilterStore((s) => s.setExploreSpotsMinRating);
+  const setExploreSpotsSortOrder = useFilterStore((s) => s.setExploreSpotsSortOrder);
+  const setExploreSpotsSortBy = useFilterStore((s) => s.setExploreSpotsSortBy);
+  const setExploreSearchFocusRequested = useFilterStore((s) => s.setExploreSearchFocusRequested);
+
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -80,6 +87,32 @@ export default function HomeScreen() {
   const handleNotificationPress = () => {
     Alert.alert("Notifications", "No new notifications at the moment.");
   }
+
+  const handleSearchPress = () => {
+    setExploreActiveTab("SPOTS");
+    setExploreSearchFocusRequested(true);
+    router.push("/explore");
+  };
+
+  const handlePopularSeeAll = () => {
+    setExploreActiveTab("SPOTS");
+    setExploreSpotsMinRating(null);
+    setExploreSpotsSortBy("rating");
+    setExploreSpotsSortOrder("desc");
+    router.push("/explore");
+  };
+
+  const handlePlansSeeAll = () => {
+    setExploreActiveTab("PLANS");
+    router.push("/explore");
+  };
+
+  const handleNearbySeeAll = () => {
+    setExploreActiveTab("SPOTS");
+    setExploreSpotsSortBy("distance");
+    setExploreSpotsSortOrder("asc");
+    router.push("/explore");
+  };
 
   const hour = new Date().getHours();
   const greeting =
@@ -146,7 +179,7 @@ export default function HomeScreen() {
         {/* SEARCH BAR */}
         <View>
           <Pressable
-            onPress={() => router.push("/explore")}
+            onPress={handleSearchPress}
             className="flex-row items-center bg-white border border-gray-200 rounded-2xl px-4 py-4"
             style={{
               shadowColor: "#000",
@@ -219,7 +252,6 @@ export default function HomeScreen() {
         <View className="mb-8">
           <SectionHeader
             title="CATEGORY"
-            onSeeAll={() => router.push("/explore")}
           />
           <ScrollView
             horizontal
@@ -242,7 +274,7 @@ export default function HomeScreen() {
         <View className="mb-5 ">
           <SectionHeader
             title="NEARBY SPOTS"
-            onSeeAll={() => router.push("/explore")}
+            onSeeAll={handleNearbySeeAll}
           />
           <NearbySpotsList refreshKey={refreshKey} />
         </View>
@@ -251,7 +283,7 @@ export default function HomeScreen() {
         <View className="mb-5">
           <SectionHeader
             title="POPULAR DESTINATIONS"
-            onSeeAll={() => router.push("/explore")}
+            onSeeAll={handlePopularSeeAll}
           />
           {popularSpots.map((spot) => (
             <WanderRow
@@ -272,7 +304,7 @@ export default function HomeScreen() {
         <View>
           <SectionHeader
             title="DISCOVER PLANS"
-            onSeeAll={() => router.push("/explore")}
+            onSeeAll={handlePlansSeeAll}
           />
           {plans.map((plan) => (
             <WanderCard

@@ -17,6 +17,9 @@ interface FilterState {
   exploreMaxBudget: number | null;
   exploreSpotsSortOrder: "asc" | "desc";
   explorePlansSortOrder: "asc" | "desc";
+  exploreSpotsSortBy: "name" | "distance" | "rating";
+  explorePlansSortBy: "name" | "rating";
+  exploreSearchFocusRequested: boolean;
   
   // Saved tab filters
   savedActiveTab: "SPOTS" | "PLANS";
@@ -38,6 +41,9 @@ interface FilterState {
   setExploreMaxBudget: (budget: number | null) => void;
   setExploreSpotsSortOrder: (order: "asc" | "desc") => void;
   setExplorePlansSortOrder: (order: "asc" | "desc") => void;
+  setExploreSpotsSortBy: (sortBy: "name" | "distance" | "rating") => void;
+  setExplorePlansSortBy: (sortBy: "name" | "rating") => void;
+  setExploreSearchFocusRequested: (requested: boolean) => void;
   setSavedActiveTab: (tab: "SPOTS" | "PLANS") => void;
   resetExploreFilters: () => void;
 }
@@ -59,6 +65,9 @@ export const useFilterStore = create<FilterState>((set) => ({
   exploreMaxBudget: null,
   exploreSpotsSortOrder: "asc",
   explorePlansSortOrder: "asc",
+  exploreSpotsSortBy: "name",
+  explorePlansSortBy: "name",
+  exploreSearchFocusRequested: false,
 
   // Saved filters initial state
   savedActiveTab: "SPOTS",
@@ -123,6 +132,18 @@ export const useFilterStore = create<FilterState>((set) => ({
     set({
       explorePlansSortOrder: order,
     }),
+  setExploreSearchFocusRequested: (requested) =>
+    set({
+      exploreSearchFocusRequested: requested,
+    }),
+  setExploreSpotsSortBy: (sortBy) =>
+    set({
+      exploreSpotsSortBy: sortBy,
+    }),
+  setExplorePlansSortBy: (sortBy) =>
+    set({
+      explorePlansSortBy: sortBy,
+    }),
   resetExploreFilters: () =>
     set({
       exploreSearchQuery: "",
@@ -135,6 +156,8 @@ export const useFilterStore = create<FilterState>((set) => ({
       exploreMaxBudget: null,
       exploreSpotsSortOrder: "asc",
       explorePlansSortOrder: "asc",
+      exploreSpotsSortBy: "name",
+      explorePlansSortBy: "name",
     }),
   setSavedActiveTab: (tab) =>
     set({

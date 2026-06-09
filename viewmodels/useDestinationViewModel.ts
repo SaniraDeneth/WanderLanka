@@ -150,6 +150,8 @@ export function useExploreScreenData() {
   const plansMinRating = useFilterStore((s) => s.explorePlansMinRating);
   const spotsSortOrder = useFilterStore((s) => s.exploreSpotsSortOrder);
   const plansSortOrder = useFilterStore((s) => s.explorePlansSortOrder);
+  const spotsSortBy = useFilterStore((s) => s.exploreSpotsSortBy);
+  const plansSortBy = useFilterStore((s) => s.explorePlansSortBy);
 
   const maxDistance = useFilterStore((s) => s.exploreMaxDistance);
   const maxDays = useFilterStore((s) => s.exploreMaxDays);
@@ -183,6 +185,8 @@ export function useExploreScreenData() {
       maxDistance !== null ||
       maxDays !== null ||
       maxBudget !== null ||
+      spotsSortBy !== "name" ||
+      plansSortBy !== "name" ||
       spotsSortOrder !== "asc" ||
       plansSortOrder !== "asc" ||
       activeVibe !== null ||
@@ -194,6 +198,8 @@ export function useExploreScreenData() {
     maxDistance,
     maxDays,
     maxBudget,
+    spotsSortBy,
+    plansSortBy,
     spotsSortOrder,
     plansSortOrder,
     activeVibe,
@@ -231,9 +237,14 @@ export function useExploreScreenData() {
       return matchSearch && matchVibe && matchCategory && matchRating && matchDistance;
     });
 
-    if (maxDistance !== null) {
-      // Auto sort by closest distance if distance filter is applied
-      result.sort((a, b) => a.distance - b.distance);
+    if (spotsSortBy === "distance") {
+      result.sort((a, b) =>
+        spotsSortOrder === "asc" ? a.distance - b.distance : b.distance - a.distance
+      );
+    } else if (spotsSortBy === "rating") {
+      result.sort((a, b) =>
+        spotsSortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
+      );
     } else {
       result.sort((a, b) =>
         spotsSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
@@ -248,6 +259,7 @@ export function useExploreScreenData() {
     activeCategory,
     spotsMinRating,
     maxDistance,
+    spotsSortBy,
     spotsSortOrder,
   ]);
 
@@ -274,12 +286,18 @@ export function useExploreScreenData() {
       return matchSearch && matchRating && matchDays && matchBudget;
     });
 
-    result.sort((a, b) =>
-      plansSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
-    );
+    if (plansSortBy === "rating") {
+      result.sort((a, b) =>
+        plansSortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
+      );
+    } else {
+      result.sort((a, b) =>
+        plansSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+      );
+    }
 
     return result;
-  }, [plans, searchQuery, plansMinRating, maxDays, maxBudget, plansSortOrder]);
+  }, [plans, searchQuery, plansMinRating, maxDays, maxBudget, plansSortBy, plansSortOrder]);
 
   return {
     isFiltersVisible,

@@ -5,9 +5,24 @@ import WanderRow from "../../components/home/WanderRow";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import ExploreFilterModal from "../../components/explore/ExploreFilterModal";
 import { useExploreScreenData } from "../../viewmodels/useDestinationViewModel";
+import { useFilterStore } from "../../store/useFilterStore";
 
 export default function ExploreScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
+  const searchInputRef = useRef<TextInput>(null);
+
+  const focusRequested = useFilterStore((s) => s.exploreSearchFocusRequested);
+  const setFocusRequested = useFilterStore((s) => s.setExploreSearchFocusRequested);
+
+  React.useEffect(() => {
+    if (focusRequested) {
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+        setFocusRequested(false);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [focusRequested, setFocusRequested]);
 
   const {
     isFiltersVisible,
@@ -107,6 +122,7 @@ export default function ExploreScreen() {
           >
             <Ionicons name="search-outline" size={16} color="#9CA3AF" />
             <TextInput
+              ref={searchInputRef}
               placeholder={activeTab === "SPOTS" ? "Search destinations..." : "Search travel plans..."}
               placeholderTextColor="#9CA3AF"
               value={searchQuery}

@@ -46,11 +46,17 @@ export default function ExploreFilterModal({
   const plansSortOrder = useFilterStore((s) => s.explorePlansSortOrder);
   const setPlansSortOrder = useFilterStore((s) => s.setExplorePlansSortOrder);
 
+  const spotsSortBy = useFilterStore((s) => s.exploreSpotsSortBy);
+  const setSpotsSortBy = useFilterStore((s) => s.setExploreSpotsSortBy);
+  const plansSortBy = useFilterStore((s) => s.explorePlansSortBy);
+  const setPlansSortBy = useFilterStore((s) => s.setExplorePlansSortBy);
+
   // Resolve active states based on activeTab
   const minRating = activeTab === "SPOTS" ? spotsMinRating : plansMinRating;
   const setMinRating = activeTab === "SPOTS" ? setSpotsMinRating : setPlansMinRating;
   const sortOrder = activeTab === "SPOTS" ? spotsSortOrder : plansSortOrder;
   const setSortOrder = activeTab === "SPOTS" ? setSpotsSortOrder : setPlansSortOrder;
+  const sortBy = activeTab === "SPOTS" ? spotsSortBy : plansSortBy;
 
   const maxDistance = useFilterStore((s) => s.exploreMaxDistance);
   const setMaxDistance = useFilterStore((s) => s.setExploreMaxDistance);
@@ -287,29 +293,63 @@ export default function ExploreFilterModal({
 
               {/* Sorting Options */}
               <View className="border-t border-gray-100 pt-3">
-                {activeTab === "SPOTS" && maxDistance !== null ? (
-                  <Text className="font-montserrat text-[9px] text-brand-green uppercase tracking-wider mt-1">
-                    Auto-sorted by closest distance first
-                  </Text>
-                ) : (
-                  <>
-                    <Text className="font-montserrat-bold text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">
-                      SORT DIRECTION
-                    </Text>
-                    <View className="flex-row gap-2">
-                      <FilterChip
-                        label="ASCENDING"
-                        isActive={sortOrder === "asc"}
-                        onPress={() => setSortOrder("asc")}
-                      />
-                      <FilterChip
-                        label="DESCENDING"
-                        isActive={sortOrder === "desc"}
-                        onPress={() => setSortOrder("desc")}
-                      />
-                    </View>
-                  </>
-                )}
+                {/* SORT BY SECTION */}
+                <Text className="font-montserrat-bold text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">
+                  SORT BY
+                </Text>
+                <View className="flex-row gap-2 mb-3">
+                  <FilterChip
+                    label="NAME"
+                    isActive={sortBy === "name"}
+                    onPress={() => {
+                      if (activeTab === "SPOTS") {
+                        setSpotsSortBy("name");
+                      } else {
+                        setPlansSortBy("name");
+                      }
+                    }}
+                  />
+                  {activeTab === "SPOTS" && (
+                    <FilterChip
+                      label="DISTANCE"
+                      isActive={sortBy === "distance"}
+                      onPress={() => {
+                        setSpotsSortBy("distance");
+                        if (permissionStatus !== "granted") {
+                          fetchUserLocation();
+                        }
+                      }}
+                    />
+                  )}
+                  <FilterChip
+                    label="RATING"
+                    isActive={sortBy === "rating"}
+                    onPress={() => {
+                      if (activeTab === "SPOTS") {
+                        setSpotsSortBy("rating");
+                      } else {
+                        setPlansSortBy("rating");
+                      }
+                    }}
+                  />
+                </View>
+
+                {/* SORT DIRECTION SECTION */}
+                <Text className="font-montserrat-bold text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">
+                  SORT DIRECTION
+                </Text>
+                <View className="flex-row gap-2">
+                  <FilterChip
+                    label="ASCENDING"
+                    isActive={sortOrder === "asc"}
+                    onPress={() => setSortOrder("asc")}
+                  />
+                  <FilterChip
+                    label="DESCENDING"
+                    isActive={sortOrder === "desc"}
+                    onPress={() => setSortOrder("desc")}
+                  />
+                </View>
               </View>
             </ScrollView>
 

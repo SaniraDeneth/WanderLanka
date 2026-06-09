@@ -11,7 +11,12 @@ import NearbySpotsList from "../../components/home/NearbySpotsList";
 import SectionHeader from "../../components/home/SectionHeader";
 import VibeChip from "../../components/home/VibeChip";
 import WanderCard from "../../components/home/WanderCard";
-import { useDestinationStore } from "../../store/useDestinationStore";
+import {
+  useDestinationActions,
+  useDestinationFilters,
+  useDiscoverPlans,
+  usePopularDestinations,
+} from "../../viewmodels/useDestinationViewModel";
 import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
 
 const AVATARS_MAP: Record<string, string> = {
@@ -35,16 +40,22 @@ export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useProfileViewModel();
 
-  const categories = useDestinationStore((s) => s.categories);
-  const plans = useDestinationStore((s) => s.plans);
-  const activeVibe = useDestinationStore((s) => s.activeVibe);
-  const activeCategory = useDestinationStore((s) => s.activeCategory);
-  const toggleFavorite = useDestinationStore((s) => s.toggleFavorite);
-  const togglePlanFavorite = useDestinationStore((s) => s.togglePlanFavorite);
-  const setActiveVibe = useDestinationStore((s) => s.setActiveVibe);
-  const setActiveCategory = useDestinationStore((s) => s.setActiveCategory);
-  const setUserLocation = useDestinationStore((s) => s.setUserLocation);
-  const getFilteredDestinations = useDestinationStore((s) => s.getFilteredDestinations);
+  const {
+    categories,
+    activeVibe,
+    activeCategory,
+    setActiveVibe,
+    setActiveCategory,
+  } = useDestinationFilters();
+
+  const {
+    toggleFavorite,
+    togglePlanFavorite,
+    setUserLocation,
+  } = useDestinationActions();
+
+  const popularSpots = usePopularDestinations();
+  const plans = useDiscoverPlans();
 
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -62,12 +73,7 @@ export default function HomeScreen() {
     setUserLocation(6.9271, 79.8612);
   }, [setUserLocation]);
 
-  const filtered = getFilteredDestinations();
 
-  // Decoupled Popular Spots: sort filtered list directly by rating
-  const popularSpots = [...filtered]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 3);
 
   const handleCardPress = (title: string) =>
     Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
@@ -178,13 +184,6 @@ export default function HomeScreen() {
                   EXPLORE THE
                 </Text>
                 <Text className="font-bebas text-3xl text-white mb-3">MISTY MOUNTAINS</Text>
-                {/* <View className="flex-row">
-                  <View className="bg-brand-green px-5 py-2.5 rounded-full">
-                    <Text className="font-montserrat-bold text-[9px] text-brand-black uppercase tracking-widest">
-                      START EXPLORING
-                    </Text>
-                  </View>
-                </View> */}
                 <Button
                   title="START EXPLORING"
                   onPress={() => router.push("/explore")}

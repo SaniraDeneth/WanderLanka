@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React from "react";
 import { Alert, Text, View } from "react-native";
 import { useDestinationStore } from "../../store/useDestinationStore";
+import { useNearbyDestinations } from "../../viewmodels/useDestinationViewModel";
 import WanderCard from "./WanderCard";
 
 interface NearbySpotsListProps {
@@ -9,30 +10,8 @@ interface NearbySpotsListProps {
 }
 
 export default function NearbySpotsList({ refreshKey = 0 }: NearbySpotsListProps) {
-  const destinations = useDestinationStore((s) => s.destinations);
-  const activeVibe = useDestinationStore((s) => s.activeVibe);
-  const activeCategory = useDestinationStore((s) => s.activeCategory);
-  const hasLocation = useDestinationStore((s) => s.userLatitude !== null && s.userLongitude !== null);
-
-  const getFilteredDestinations = useDestinationStore((s) => s.getFilteredDestinations);
-  const getSortedDestinations = useDestinationStore((s) => s.getSortedDestinations);
   const toggleFavorite = useDestinationStore((s) => s.toggleFavorite);
-
-  // useMemo "stores" the calculated array and forces an update when dependencies change
-  const nearbySpots = useMemo(() => {
-    const filtered = getFilteredDestinations();
-    const sorted = getSortedDestinations(filtered);
-    return sorted.slice(0, 3);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    destinations,
-    activeVibe,
-    activeCategory,
-    refreshKey,
-    hasLocation,
-    getFilteredDestinations,
-    getSortedDestinations,
-  ]);
+  const nearbySpots = useNearbyDestinations(refreshKey);
 
   const handleCardPress = (title: string) =>
     Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);

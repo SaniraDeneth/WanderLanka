@@ -3,6 +3,7 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import heroImage from "../../assets/images/ui/misty-mountain.png";
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import CategoryCircle from "../../components/home/CategoryCircle";
@@ -33,8 +34,7 @@ const AVATARS_MAP: Record<string, string> = {
 
 const VIBES = ["NATURE", "CULTURE", "ADVENTURE"];
 
-const HERO_IMAGE_URI =
-  "../../assets/images/ui/misty-mountain.png";
+
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -169,7 +169,7 @@ export default function HomeScreen() {
             style={{ height: 200 }}
           >
             <Image
-              source={require(HERO_IMAGE_URI)}
+              source={heroImage}
               style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
               contentFit="cover"
             />

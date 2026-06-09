@@ -1,6 +1,5 @@
-import { Image } from "react-native";
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 interface CategoryCircleProps {
   name: string;
@@ -26,11 +25,11 @@ export default function CategoryCircle({
           <Image
             source={{ uri: imageUri }}
             className="w-full h-full"
-            contentFit="cover"
+            resizeMode="cover"
           />
         </View>
       </View>
-      <Text className="font-montserrat-bold text-[9px] text-gray-500 uppercase tracking-widest mt-2 text-center">
+      <Text className="font-bebas text-md text-gray-500 uppercase  mt-2 text-center">
         {name}
       </Text>
     </Pressable>

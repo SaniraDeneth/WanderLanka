@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useWanderStore } from "../store/useWanderStore";
+import { useMemo, useState } from "react";
+import { useWanderStore, getHaversineDistance } from "../store/useWanderStore";
 import { useFilterStore } from "../store/useFilterStore";
 import { useLocationStore } from "../store/useLocationStore";
 
@@ -131,5 +131,170 @@ export function useDestinationActions() {
     togglePlanFavorite,
     setUserLocation,
     fetchUserLocation,
+  };
+}
+
+// Hook to encapsulate all filtering, sorting, tab switching, and search logic for the Explore screen.
+export function useExploreScreenData() {
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  // Store-bound filter states
+  const activeTab = useFilterStore((s) => s.exploreActiveTab);
+  const setActiveTab = useFilterStore((s) => s.setExploreActiveTab);
+  const searchQuery = useFilterStore((s) => s.exploreSearchQuery);
+  const setSearchQuery = useFilterStore((s) => s.setExploreSearchQuery);
+
+  // Tab-specific filters retrieved from store
+  const spotsMinRating = useFilterStore((s) => s.exploreSpotsMinRating);
+  const plansMinRating = useFilterStore((s) => s.explorePlansMinRating);
+  const spotsSortOrder = useFilterStore((s) => s.exploreSpotsSortOrder);
+  const plansSortOrder = useFilterStore((s) => s.explorePlansSortOrder);
+
+  const maxDistance = useFilterStore((s) => s.exploreMaxDistance);
+  const maxDays = useFilterStore((s) => s.exploreMaxDays);
+  const maxBudget = useFilterStore((s) => s.exploreMaxBudget);
+  const resetExploreFilters = useFilterStore((s) => s.resetExploreFilters);
+
+  const { activeVibe, activeCategory } = useExploreFilters();
+  const { toggleFavorite, togglePlanFavorite } = useDestinationActions();
+
+  // Load raw data from Zustand store
+  const destinations = useWanderStore((s) => s.destinations);
+  const plans = useWanderStore((s) => s.plans);
+  const userLatitude = useLocationStore((s) => s.userLatitude);
+  const userLongitude = useLocationStore((s) => s.userLongitude);
+
+  // Reset all advanced filters
+  const handleClearAllFilters = () => {
+    resetExploreFilters();
+  };
+
+  const changeTab = (tab: "SPOTS" | "PLANS") => {
+    setActiveTab(tab);
+    setSearchQuery("");
+  };
+
+  // Check if any filter is active
+  const hasActiveFilters = useMemo(() => {
+    return (
+      spotsMinRating !== null ||
+      plansMinRating !== null ||
+      maxDistance !== null ||
+      maxDays !== null ||
+      maxBudget !== null ||
+      spotsSortOrder !== "asc" ||
+      plansSortOrder !== "asc" ||
+      activeVibe !== null ||
+      activeCategory !== null
+    );
+  }, [
+    spotsMinRating,
+    plansMinRating,
+    maxDistance,
+    maxDays,
+    maxBudget,
+    spotsSortOrder,
+    plansSortOrder,
+    activeVibe,
+    activeCategory,
+  ]);
+
+  // Compute distances relative to user location (Colombo fallback if GPS denied)
+  const computedDestinations = useMemo(() => {
+    const lat = userLatitude ?? 6.9271;
+    const lng = userLongitude ?? 79.8612;
+    return destinations.map((dest) => {
+      const dist = getHaversineDistance(lat, lng, dest.latitude, dest.longitude);
+      return { ...dest, distance: parseFloat(dist.toFixed(1)) };
+    });
+  }, [destinations, userLatitude, userLongitude]);
+
+  // Dynamic filtering & sorting for Spots (Destinations)
+  const filteredSpots = useMemo(() => {
+    let result = computedDestinations.filter((spot) => {
+      const matchSearch = searchQuery
+        ? spot.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          spot.description.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+
+      const matchVibe = activeVibe
+        ? spot.vibeTag.toUpperCase() === activeVibe.toUpperCase()
+        : true;
+
+      const matchCategory = activeCategory ? spot.categoryId === activeCategory : true;
+
+      const matchRating = spotsMinRating ? spot.rating >= spotsMinRating : true;
+
+      const matchDistance = maxDistance ? spot.distance <= maxDistance : true;
+
+      return matchSearch && matchVibe && matchCategory && matchRating && matchDistance;
+    });
+
+    if (maxDistance !== null) {
+      // Auto sort by closest distance if distance filter is applied
+      result.sort((a, b) => a.distance - b.distance);
+    } else {
+      result.sort((a, b) =>
+        spotsSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+      );
+    }
+
+    return result;
+  }, [
+    computedDestinations,
+    searchQuery,
+    activeVibe,
+    activeCategory,
+    spotsMinRating,
+    maxDistance,
+    spotsSortOrder,
+  ]);
+
+  // Dynamic filtering & sorting for Plans (Itineraries)
+  const filteredPlans = useMemo(() => {
+    let result = plans.filter((plan) => {
+      const matchSearch = searchQuery
+        ? plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+
+      const matchRating = plansMinRating ? plan.rating >= plansMinRating : true;
+
+      let matchDays = true;
+      if (maxDays !== null) {
+        const parsedDays = parseInt(plan.duration);
+        if (!isNaN(parsedDays)) {
+          matchDays = parsedDays <= maxDays;
+        }
+      }
+
+      const matchBudget = maxBudget && plan.budget ? plan.budget <= maxBudget : true;
+
+      return matchSearch && matchRating && matchDays && matchBudget;
+    });
+
+    result.sort((a, b) =>
+      plansSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+    );
+
+    return result;
+  }, [plans, searchQuery, plansMinRating, maxDays, maxBudget, plansSortOrder]);
+
+  return {
+    isFiltersVisible,
+    setIsFiltersVisible,
+    scrollY,
+    setScrollY,
+    activeTab,
+    searchQuery,
+    setSearchQuery,
+    filteredSpots,
+    filteredPlans,
+    hasActiveFilters,
+    handleClearAllFilters,
+    changeTab,
+    toggleFavorite,
+    togglePlanFavorite,
   };
 }

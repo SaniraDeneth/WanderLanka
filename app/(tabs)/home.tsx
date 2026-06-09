@@ -51,7 +51,7 @@ export default function HomeScreen() {
   const {
     toggleFavorite,
     togglePlanFavorite,
-    setUserLocation,
+    fetchUserLocation,
   } = useDestinationActions();
 
   const popularSpots = usePopularDestinations();
@@ -62,16 +62,15 @@ export default function HomeScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
+    fetchUserLocation().finally(() => {
       setRefreshKey((prev) => prev + 1);
       setRefreshing(false);
-    }, 400);
-  }, []);
+    });
+  }, [fetchUserLocation]);
 
   useEffect(() => {
-    // Set Initial Location (Colombo)
-    setUserLocation(6.9271, 79.8612);
-  }, [setUserLocation]);
+    fetchUserLocation();
+  }, [fetchUserLocation]);
 
 
 

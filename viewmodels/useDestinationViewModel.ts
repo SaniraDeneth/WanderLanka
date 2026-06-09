@@ -85,10 +85,12 @@ export function useDestinationActions() {
   const toggleFavorite = useDestinationStore((s) => s.toggleFavorite);
   const togglePlanFavorite = useDestinationStore((s) => s.togglePlanFavorite);
   const setUserLocation = useDestinationStore((s) => s.setUserLocation);
+  const fetchUserLocation = useDestinationStore((s) => s.fetchUserLocation);
 
   return {
     toggleFavorite,
     togglePlanFavorite,
     setUserLocation,
+    fetchUserLocation,
   };
 }

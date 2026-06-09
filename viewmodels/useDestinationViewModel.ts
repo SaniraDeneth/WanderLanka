@@ -81,6 +81,22 @@ export function useFilteredDestinations(searchQuery = "") {
   }, [destinations, activeVibe, activeCategory, searchQuery]);
 }
 
+// Hook to retrieve filtered and searched plans for Explore screen.
+export function useFilteredPlans(searchQuery = "") {
+  const plans = useDestinationStore((s) => s.plans);
+
+  return useMemo(() => {
+    return plans.filter((plan) => {
+      const matchSearch = searchQuery
+        ? plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+      return matchSearch;
+    });
+  }, [plans, searchQuery]);
+}
+
+
 
 // Hook to retrieve destination filters (categories, vibes, and active selections).
 export function useDestinationFilters() {

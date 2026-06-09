@@ -14,7 +14,7 @@ interface PopularDestinationRowProps {
   onToggleFavorite: () => void;
 }
 
-export default function PopularDestinationRow({
+export default function DestinationRow({
   title,
   imageUri,
   rating,

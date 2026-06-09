@@ -25,20 +25,20 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "compass" : "compass-outline"} size={22} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="map"
         options={{
           title: "Map",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "map" : "map-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Explore",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "compass" : "compass-outline"} size={22} color={color} />
           ),
         }}
       />

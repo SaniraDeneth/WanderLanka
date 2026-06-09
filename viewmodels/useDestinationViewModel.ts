@@ -62,6 +62,25 @@ export function useDiscoverPlans() {
   return useDestinationStore((s) => s.plans);
 }
 
+// Hook to retrieve filtered and searched destinations for Explore screen.
+export function useFilteredDestinations(searchQuery = "") {
+  const destinations = useDestinationStore((s) => s.destinations);
+  const activeVibe = useDestinationStore((s) => s.activeVibe);
+  const activeCategory = useDestinationStore((s) => s.activeCategory);
+
+  return useMemo(() => {
+    return destinations.filter((dest) => {
+      const matchVibe = activeVibe ? dest.vibeTag.toUpperCase() === activeVibe.toUpperCase() : true;
+      const matchCategory = activeCategory ? dest.categoryId === activeCategory : true;
+      const matchSearch = searchQuery
+        ? dest.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          dest.description.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+      return matchVibe && matchCategory && matchSearch;
+    });
+  }, [destinations, activeVibe, activeCategory, searchQuery]);
+}
+
 
 // Hook to retrieve destination filters (categories, vibes, and active selections).
 export function useDestinationFilters() {

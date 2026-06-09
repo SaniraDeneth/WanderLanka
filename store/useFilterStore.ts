@@ -17,6 +17,9 @@ interface FilterState {
   exploreMaxBudget: number | null;
   exploreSpotsSortOrder: "asc" | "desc";
   explorePlansSortOrder: "asc" | "desc";
+  
+  // Saved tab filters
+  savedActiveTab: "SPOTS" | "PLANS";
 
   // Actions for Home filters
   setHomeVibe: (vibe: string | null) => void;
@@ -35,6 +38,7 @@ interface FilterState {
   setExploreMaxBudget: (budget: number | null) => void;
   setExploreSpotsSortOrder: (order: "asc" | "desc") => void;
   setExplorePlansSortOrder: (order: "asc" | "desc") => void;
+  setSavedActiveTab: (tab: "SPOTS" | "PLANS") => void;
   resetExploreFilters: () => void;
 }
 
@@ -55,6 +59,9 @@ export const useFilterStore = create<FilterState>((set) => ({
   exploreMaxBudget: null,
   exploreSpotsSortOrder: "asc",
   explorePlansSortOrder: "asc",
+
+  // Saved filters initial state
+  savedActiveTab: "SPOTS",
 
   // Home actions
   setHomeVibe: (vibe) =>
@@ -128,5 +135,9 @@ export const useFilterStore = create<FilterState>((set) => ({
       exploreMaxBudget: null,
       exploreSpotsSortOrder: "asc",
       explorePlansSortOrder: "asc",
+    }),
+  setSavedActiveTab: (tab) =>
+    set({
+      savedActiveTab: tab,
     }),
 }));

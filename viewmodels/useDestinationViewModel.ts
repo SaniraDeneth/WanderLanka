@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { useWanderStore, getHaversineDistance } from "../store/useWanderStore";
 import { useFilterStore } from "../store/useFilterStore";
 import { useLocationStore } from "../store/useLocationStore";
+import { getHaversineDistance, useWanderStore } from "../store/useWanderStore";
 
 // Hook to retrieve popular destinations.
 export function usePopularDestinations() {
@@ -25,10 +25,10 @@ export function usePopularDestinations() {
 export function useNearbyDestinations(refreshKey = 0) {
   const destinations = useWanderStore((s) => s.destinations);
   const getSortedDestinations = useWanderStore((s) => s.getSortedDestinations);
-  
+
   const homeVibe = useFilterStore((s) => s.homeVibe);
   const homeCategory = useFilterStore((s) => s.homeCategory);
-  
+
   const userLatitude = useLocationStore((s) => s.userLatitude);
   const userLongitude = useLocationStore((s) => s.userLongitude);
 
@@ -59,7 +59,7 @@ export function useFilteredDestinations(searchQuery = "") {
       const matchCategory = exploreCategory ? dest.categoryId === exploreCategory : true;
       const matchSearch = searchQuery
         ? dest.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          dest.description.toLowerCase().includes(searchQuery.toLowerCase())
+        dest.description.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
       return matchVibe && matchCategory && matchSearch;
     });
@@ -74,7 +74,7 @@ export function useFilteredPlans(searchQuery = "") {
     return plans.filter((plan) => {
       const matchSearch = searchQuery
         ? plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
+        plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
       return matchSearch;
     });
@@ -121,7 +121,7 @@ export function useExploreFilters() {
 export function useDestinationActions() {
   const toggleFavorite = useWanderStore((s) => s.toggleFavorite);
   const togglePlanFavorite = useWanderStore((s) => s.togglePlanFavorite);
-  
+
   // Route location tracking from useLocationStore
   const fetchUserLocation = useLocationStore((s) => s.fetchUserLocation);
   const setUserLocation = useLocationStore((s) => s.setUserLocation);
@@ -215,7 +215,7 @@ export function useExploreScreenData() {
     let result = computedDestinations.filter((spot) => {
       const matchSearch = searchQuery
         ? spot.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          spot.description.toLowerCase().includes(searchQuery.toLowerCase())
+        spot.description.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
       const matchVibe = activeVibe
@@ -256,7 +256,7 @@ export function useExploreScreenData() {
     let result = plans.filter((plan) => {
       const matchSearch = searchQuery
         ? plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
+        plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
       const matchRating = plansMinRating ? plan.rating >= plansMinRating : true;
@@ -298,3 +298,41 @@ export function useExploreScreenData() {
     togglePlanFavorite,
   };
 }
+
+// Hook to encapsulate all calculations for the Saved screen.
+export function useSavedScreenData() {
+  const activeTab = useFilterStore((s) => s.savedActiveTab);
+  const setActiveTab = useFilterStore((s) => s.setSavedActiveTab);
+
+  const destinations = useWanderStore((s) => s.destinations);
+  const plans = useWanderStore((s) => s.plans);
+
+  const userLatitude = useLocationStore((s) => s.userLatitude);
+  const userLongitude = useLocationStore((s) => s.userLongitude);
+
+  const { toggleFavorite, togglePlanFavorite } = useDestinationActions();
+
+  const savedSpots = useMemo(() => {
+    const lat = userLatitude ?? 6.9271;
+    const lng = userLongitude ?? 79.8612;
+    const favorited = destinations.filter((dest) => dest.isFavorite);
+    return favorited.map((dest) => {
+      const dist = getHaversineDistance(lat, lng, dest.latitude, dest.longitude);
+      return { ...dest, distance: parseFloat(dist.toFixed(1)) };
+    });
+  }, [destinations, userLatitude, userLongitude]);
+
+  const savedPlans = useMemo(() => {
+    return plans.filter((plan) => plan.isFavorite);
+  }, [plans]);
+
+  return {
+    activeTab,
+    setActiveTab,
+    savedSpots,
+    savedPlans,
+    toggleFavorite,
+    togglePlanFavorite,
+  };
+}
+

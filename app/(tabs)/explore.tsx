@@ -4,25 +4,49 @@ import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Te
 import FilterChip from "../../components/home/FilterChip";
 import WanderRow from "../../components/home/WanderRow";
 import ScreenWrapper from "../../components/ScreenWrapper";
-import { getHaversineDistance, useDestinationStore } from "../../store/useDestinationStore";
+import { useFilterStore } from "../../store/useFilterStore";
+import { useLocationStore } from "../../store/useLocationStore";
+import { getHaversineDistance, useWanderStore } from "../../store/useWanderStore";
 import {
   useDestinationActions,
-  useDestinationFilters,
+  useExploreFilters,
 } from "../../viewmodels/useDestinationViewModel";
 
 const VIBES = ["NATURE", "CULTURE", "ADVENTURE"];
 
 export default function ExploreScreen() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"SPOTS" | "PLANS">("SPOTS");
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
 
-  // Advanced filter states
-  const [minRating, setMinRating] = useState<number | null>(null);
-  const [maxDistance, setMaxDistance] = useState<number | null>(null);
-  const [maxDays, setMaxDays] = useState<number | null>(null);
-  const [maxBudget, setMaxBudget] = useState<number | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  // Store-bound filter states
+  const activeTab = useFilterStore((s) => s.exploreActiveTab);
+  const setActiveTab = useFilterStore((s) => s.setExploreActiveTab);
+  const searchQuery = useFilterStore((s) => s.exploreSearchQuery);
+  const setSearchQuery = useFilterStore((s) => s.setExploreSearchQuery);
+
+  // Tab-specific filters retrieved from store
+  const spotsMinRating = useFilterStore((s) => s.exploreSpotsMinRating);
+  const setSpotsMinRating = useFilterStore((s) => s.setExploreSpotsMinRating);
+  const plansMinRating = useFilterStore((s) => s.explorePlansMinRating);
+  const setPlansMinRating = useFilterStore((s) => s.setExplorePlansMinRating);
+
+  const spotsSortOrder = useFilterStore((s) => s.exploreSpotsSortOrder);
+  const setSpotsSortOrder = useFilterStore((s) => s.setExploreSpotsSortOrder);
+  const plansSortOrder = useFilterStore((s) => s.explorePlansSortOrder);
+  const setPlansSortOrder = useFilterStore((s) => s.setExplorePlansSortOrder);
+
+  // Resolve active states based on activeTab
+  const minRating = activeTab === "SPOTS" ? spotsMinRating : plansMinRating;
+  const setMinRating = activeTab === "SPOTS" ? setSpotsMinRating : setPlansMinRating;
+  const sortOrder = activeTab === "SPOTS" ? spotsSortOrder : plansSortOrder;
+  const setSortOrder = activeTab === "SPOTS" ? setSpotsSortOrder : setPlansSortOrder;
+
+  const maxDistance = useFilterStore((s) => s.exploreMaxDistance);
+  const setMaxDistance = useFilterStore((s) => s.setExploreMaxDistance);
+  const maxDays = useFilterStore((s) => s.exploreMaxDays);
+  const setMaxDays = useFilterStore((s) => s.setExploreMaxDays);
+  const maxBudget = useFilterStore((s) => s.exploreMaxBudget);
+  const setMaxBudget = useFilterStore((s) => s.setExploreMaxBudget);
+  const resetExploreFilters = useFilterStore((s) => s.resetExploreFilters);
 
   // Scroll tracking and ScrollView ref for pull-down reset gesture
   const [scrollY, setScrollY] = useState(0);
@@ -34,46 +58,43 @@ export default function ExploreScreen() {
     activeCategory,
     setActiveVibe,
     setActiveCategory,
-  } = useDestinationFilters();
+  } = useExploreFilters();
 
-  const { toggleFavorite, togglePlanFavorite } = useDestinationActions();
+  const { toggleFavorite, togglePlanFavorite, fetchUserLocation } = useDestinationActions();
+  const permissionStatus = useLocationStore((s) => s.permissionStatus);
 
   // Load raw data from Zustand store
-  const destinations = useDestinationStore((s) => s.destinations);
-  const plans = useDestinationStore((s) => s.plans);
-  const userLatitude = useDestinationStore((s) => s.userLatitude);
-  const userLongitude = useDestinationStore((s) => s.userLongitude);
+  const destinations = useWanderStore((s) => s.destinations);
+  const plans = useWanderStore((s) => s.plans);
+  const userLatitude = useLocationStore((s) => s.userLatitude);
+  const userLongitude = useLocationStore((s) => s.userLongitude);
 
   // Reset all advanced filters
   const handleClearAllFilters = () => {
-    setMinRating(null);
-    setMaxDistance(null);
-    setMaxDays(null);
-    setMaxBudget(null);
-    setSortOrder("asc");
-    setActiveVibe(null);
-    setActiveCategory(null);
+    resetExploreFilters();
   };
 
   const handleTabChange = (tab: "SPOTS" | "PLANS") => {
     setActiveTab(tab);
     setSearchQuery("");
-    handleClearAllFilters();
+    // Preserve filters when switching internal tabs!
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
   // Check if any filter is active
   const hasActiveFilters = useMemo(() => {
     return (
-      minRating !== null ||
+      spotsMinRating !== null ||
+      plansMinRating !== null ||
       maxDistance !== null ||
       maxDays !== null ||
       maxBudget !== null ||
-      sortOrder !== "asc" ||
+      spotsSortOrder !== "asc" ||
+      plansSortOrder !== "asc" ||
       activeVibe !== null ||
       activeCategory !== null
     );
-  }, [minRating, maxDistance, maxDays, maxBudget, sortOrder, activeVibe, activeCategory]);
+  }, [spotsMinRating, plansMinRating, maxDistance, maxDays, maxBudget, spotsSortOrder, plansSortOrder, activeVibe, activeCategory]);
 
   // Compute distances relative to user location (Colombo fallback if GPS denied)
   const computedDestinations = useMemo(() => {
@@ -99,7 +120,7 @@ export default function ExploreScreen() {
 
       const matchCategory = activeCategory ? spot.categoryId === activeCategory : true;
 
-      const matchRating = minRating ? spot.rating >= minRating : true;
+      const matchRating = spotsMinRating ? spot.rating >= spotsMinRating : true;
 
       const matchDistance = maxDistance ? spot.distance <= maxDistance : true;
 
@@ -111,12 +132,12 @@ export default function ExploreScreen() {
       result.sort((a, b) => a.distance - b.distance);
     } else {
       result.sort((a, b) =>
-        sortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+        spotsSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
       );
     }
 
     return result;
-  }, [computedDestinations, searchQuery, activeVibe, activeCategory, minRating, maxDistance, sortOrder]);
+  }, [computedDestinations, searchQuery, activeVibe, activeCategory, spotsMinRating, maxDistance, spotsSortOrder]);
 
   // Dynamic filtering & sorting for Plans (Itineraries)
   const filteredPlans = useMemo(() => {
@@ -126,7 +147,7 @@ export default function ExploreScreen() {
         plan.overview.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
-      const matchRating = minRating ? plan.rating >= minRating : true;
+      const matchRating = plansMinRating ? plan.rating >= plansMinRating : true;
 
       let matchDays = true;
       if (maxDays !== null) {
@@ -142,11 +163,11 @@ export default function ExploreScreen() {
     });
 
     result.sort((a, b) =>
-      sortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+      plansSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
     );
 
     return result;
-  }, [plans, searchQuery, minRating, maxDays, maxBudget, sortOrder]);
+  }, [plans, searchQuery, plansMinRating, maxDays, maxBudget, plansSortOrder]);
 
   const handleCardPress = (title: string) =>
     Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
@@ -374,7 +395,12 @@ export default function ExploreScreen() {
                         <View className="flex-row items-center gap-2">
                           <TextInput
                             value={maxDistance !== null ? String(maxDistance) : ""}
-                            onChangeText={(val) => setMaxDistance(val ? parseFloat(val) : null)}
+                            onChangeText={(val) => {
+                              setMaxDistance(val ? parseFloat(val) : null);
+                              if (val && permissionStatus !== "granted") {
+                                fetchUserLocation();
+                              }
+                            }}
                             placeholder="e.g. 50"
                             keyboardType="numeric"
                             style={{ width: 90, height: 36, textAlign: "center" }}

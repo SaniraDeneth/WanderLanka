@@ -14,7 +14,7 @@ import FilterChip from "../../components/home/FilterChip";
 import WanderCard from "../../components/home/WanderCard";
 import {
   useDestinationActions,
-  useDestinationFilters,
+  useHomeFilters,
   useDiscoverPlans,
   usePopularDestinations,
 } from "../../viewmodels/useDestinationViewModel";
@@ -46,7 +46,7 @@ export default function HomeScreen() {
     activeCategory,
     setActiveVibe,
     setActiveCategory,
-  } = useDestinationFilters();
+  } = useHomeFilters();
 
   const {
     toggleFavorite,

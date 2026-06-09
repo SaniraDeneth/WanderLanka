@@ -6,7 +6,7 @@ import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import BrandLoader from "../components/BrandLoader";
-import { useDestinationStore } from "../store/useDestinationStore";
+import { useWanderStore } from "../store/useWanderStore";
 import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
 import "./global.css";
 
@@ -42,8 +42,8 @@ export default function RootLayout() {
 
 function RootLayoutContent() {
   const { profile, loading: profileLoading, reloadProfile } = useProfileViewModel();
-  const initDatabase = useDestinationStore((state) => state.initDatabase);
-  const dbLoading = useDestinationStore((state) => state.loading);
+  const initDatabase = useWanderStore((state) => state.initDatabase);
+  const dbLoading = useWanderStore((state) => state.loading);
   const pathname = usePathname();
   const router = useRouter();
 

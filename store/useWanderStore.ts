@@ -1,6 +1,4 @@
 import { create } from "zustand";
-import * as Location from "expo-location";
-import { Alert, Linking } from "react-native";
 import { Category } from "../models/Category";
 import { Destination } from "../models/Destination";
 import { Plan } from "../models/Plan";
@@ -28,41 +26,32 @@ export function getHaversineDistance(
   return R * c;
 }
 
-interface DestinationState {
+interface WanderState {
   destinations: Destination[];
   categories: Category[];
   plans: Plan[];
-  activeVibe: string | null;
-  activeCategory: number | null;
-  userLatitude: number | null;
-  userLongitude: number | null;
   loading: boolean;
 
   initDatabase: () => Promise<void>;
   loadData: () => Promise<void>;
   toggleFavorite: (id: number) => Promise<void>;
   togglePlanFavorite: (id: number) => Promise<void>;
-  setActiveVibe: (vibe: string | null) => void;
-  setActiveCategory: (categoryId: number | null) => void;
-  setUserLocation: (latitude: number, longitude: number) => void;
-  fetchUserLocation: () => Promise<void>;
 
   // Selectors
-  getFilteredDestinations: () => Destination[];
-  getSortedDestinations: (list: Destination[]) => (Destination & { distance: number })[];
+  getSortedDestinations: (
+    list: Destination[],
+    userLatitude: number | null,
+    userLongitude: number | null
+  ) => (Destination & { distance: number })[];
   getFavoriteDestinations: () => Destination[];
   getFavoritePlans: () => Plan[];
 }
 
 //zustand store
-export const useDestinationStore = create<DestinationState>((set, get) => ({
+export const useWanderStore = create<WanderState>((set, get) => ({
   destinations: [],
   categories: [],
   plans: [],
-  activeVibe: null,
-  activeCategory: null,
-  userLatitude: null,
-  userLongitude: null,
   loading: true,
 
   initDatabase: async () => {
@@ -71,7 +60,7 @@ export const useDestinationStore = create<DestinationState>((set, get) => ({
       await dbService.initDatabase();
       await get().loadData();
     } catch (error) {
-      console.error("[useDestinationStore] Database setup error:", error);
+      console.error("[useWanderStore] Database setup error:", error);
     } finally {
       set({ loading: false });
     }
@@ -143,73 +132,12 @@ export const useDestinationStore = create<DestinationState>((set, get) => ({
     }
   },
 
-  setActiveVibe: (vibe: string | null) => {
-    // If selecting the active vibe, clear it (toggle behavior)
-    set((state) => ({
-      activeVibe: state.activeVibe === vibe ? null : vibe,
-    }));
-  },
-
-  setActiveCategory: (categoryId: number | null) => {
-    // If selecting the active category, clear it (toggle behavior)
-    set((state) => ({
-      activeCategory: state.activeCategory === categoryId ? null : categoryId,
-    }));
-  },
-
-  setUserLocation: (latitude: number, longitude: number) => {
-    console.log(`[GPS Store] Store updated to: Lat=${latitude}, Lng=${longitude}`);
-    set({ userLatitude: latitude, userLongitude: longitude });
-  },
-
-  fetchUserLocation: async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        // Delay alert by 500ms so the ScrollView refresh control has time to animate back to the top.
-        setTimeout(() => {
-          Alert.alert(
-            "Location Access Required",
-            "WanderLanka needs location access to find and sort nearby spots. Please enable location permissions in your device settings.",
-            [
-              { text: "Cancel", style: "cancel" },
-              { text: "Open Settings", onPress: () => Linking.openSettings() }
-            ]
-          );
-        }, 500);
-        console.log("[GPS Store] Location permission denied. Using Colombo fallback.");
-        // Fallback to Colombo
-        get().setUserLocation(6.9271, 79.8612);
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      console.log(`[GPS Store] Live device coordinates received: Lat=${location.coords.latitude}, Lng=${location.coords.longitude}`);
-      get().setUserLocation(location.coords.latitude, location.coords.longitude);
-    } catch (error) {
-      console.error("[useDestinationStore] fetchUserLocation error:", error);
-      // Fallback to Colombo
-      get().setUserLocation(6.9271, 79.8612);
-    }
-  },
-
-  getFilteredDestinations: () => {
-    const { destinations, activeVibe, activeCategory } = get();
-    return destinations.filter((dest) => {
-      const matchVibe = activeVibe ? dest.vibeTag.toUpperCase() === activeVibe.toUpperCase() : true;
-      const matchCategory = activeCategory ? dest.categoryId === activeCategory : true;
-      return matchVibe && matchCategory;
-    });
-  },
-
-  getSortedDestinations: (list: Destination[]) => {
-    const { userLatitude, userLongitude } = get();
-
+  getSortedDestinations: (
+    list: Destination[],
+    userLatitude: number | null,
+    userLongitude: number | null
+  ) => {
     if (userLatitude === null || userLongitude === null) {
-      // Return list with distance of 0 if location is not resolved
       return list.map((dest) => ({ ...dest, distance: 0 }));
     }
 

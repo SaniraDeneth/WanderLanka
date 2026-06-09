@@ -8,5 +8,6 @@ export interface Plan {
   rating: number;
   imageUri: string;
   isFavorite: boolean;
+  budget?: number;
   destinations?: Destination[];
 }

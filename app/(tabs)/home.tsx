@@ -7,10 +7,10 @@ import heroImage from "../../assets/images/ui/misty-mountain.png";
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import CategoryCircle from "../../components/home/CategoryCircle";
-import PopularDestinationRow from "../../components/home/DestinationRow";
+import WanderRow from "../../components/home/WanderRow";
 import NearbySpotsList from "../../components/home/NearbySpotsList";
 import SectionHeader from "../../components/home/SectionHeader";
-import VibeChip from "../../components/home/VibeChip";
+import FilterChip from "../../components/home/FilterChip";
 import WanderCard from "../../components/home/WanderCard";
 import {
   useDestinationActions,
@@ -205,7 +205,7 @@ export default function HomeScreen() {
             contentContainerStyle={{ gap: 8 }}
           >
             {VIBES.map((vibe) => (
-              <VibeChip
+              <FilterChip
                 key={vibe}
                 label={vibe}
                 isActive={activeVibe?.toUpperCase() === vibe}
@@ -254,7 +254,7 @@ export default function HomeScreen() {
             onSeeAll={() => router.push("/explore")}
           />
           {popularSpots.map((spot) => (
-            <PopularDestinationRow
+            <WanderRow
               key={spot.id}
               id={spot.id}
               title={spot.title}

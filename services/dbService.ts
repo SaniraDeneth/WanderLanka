@@ -49,7 +49,8 @@ export const dbService = {
           duration TEXT NOT NULL,
           rating REAL DEFAULT 5.0,
           image_uri TEXT NOT NULL,
-          is_favorite INTEGER DEFAULT 0
+          is_favorite INTEGER DEFAULT 0,
+          budget REAL DEFAULT 150.0
         );
 
         CREATE TABLE IF NOT EXISTS plan_destinations (
@@ -57,6 +58,7 @@ export const dbService = {
           destination_id INTEGER NOT NULL,
           day_number INTEGER NOT NULL,
           sequence_order INTEGER NOT NULL,
+          budget REAL DEFAULT 150.0,
           PRIMARY KEY (plan_id, destination_id),
           FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
           FOREIGN KEY (destination_id) REFERENCES destinations (id) ON DELETE CASCADE
@@ -216,25 +218,28 @@ export const dbService = {
           overview: "A single day focused trip to see the famous bridge in Ella, explore the surrounding tea fields, and check out rail vantage points.",
           duration: "1 DAY",
           rating: 4.9,
-          image_uri: "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=600&auto=format&fit=crop"
+          image_uri: "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=600&auto=format&fit=crop",
+          budget: 50.0
         },
         {
           title: "3-DAY SOUTH COAST EXPLORER",
           overview: "A beautiful coastal adventure covering colonial history in Galle Fort, relaxing beach vibes in Mirissa, and ending with a wildlife safari in Yala.",
           duration: "3 DAYS",
           rating: 5.0,
-          image_uri: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop"
+          image_uri: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop",
+          budget: 250.0
         }
       ];
 
       for (const plan of plansSeed) {
         await db.runAsync(
-          "INSERT INTO plans (title, overview, duration, rating, image_uri, is_favorite) VALUES (?, ?, ?, ?, ?, 0);",
+          "INSERT INTO plans (title, overview, duration, rating, image_uri, budget, is_favorite) VALUES (?, ?, ?, ?, ?, ?, 0);",
           plan.title,
           plan.overview,
           plan.duration,
           plan.rating,
-          plan.image_uri
+          plan.image_uri,
+          plan.budget
         );
       }
 

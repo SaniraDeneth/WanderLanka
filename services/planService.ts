@@ -1,6 +1,6 @@
-import { dbService } from "./dbService";
-import { Plan } from "../models/Plan";
 import { Destination } from "../models/Destination";
+import { Plan } from "../models/Plan";
+import { dbService } from "./dbService";
 
 export const planService = {
   //Retrieves all travel plans from the SQLite database.
@@ -16,6 +16,7 @@ export const planService = {
         rating: row.rating,
         imageUri: row.image_uri,
         isFavorite: row.is_favorite === 1,
+        budget: row.budget,
       }));
     } catch (error) {
       console.error("Error fetching plans from SQLite:", error);
@@ -70,6 +71,7 @@ export const planService = {
         rating: planRow.rating,
         imageUri: planRow.image_uri,
         isFavorite: planRow.is_favorite === 1,
+        budget: planRow.budget,
         destinations,
       };
     } catch (error) {

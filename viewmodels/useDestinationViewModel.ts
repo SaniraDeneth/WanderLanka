@@ -354,3 +354,32 @@ export function useSavedScreenData() {
   };
 }
 
+// Hook to encapsulate all calculations for the Map screen.
+export function useMapScreenData() {
+  const destinations = useWanderStore((s) => s.destinations);
+  const userLatitude = useLocationStore((s) => s.userLatitude);
+  const userLongitude = useLocationStore((s) => s.userLongitude);
+  const permissionStatus = useLocationStore((s) => s.permissionStatus);
+  const fetchUserLocation = useLocationStore((s) => s.fetchUserLocation);
+  const { toggleFavorite } = useDestinationActions();
+
+  const mapDestinations = useMemo(() => {
+    const lat = userLatitude ?? 6.9271;
+    const lng = userLongitude ?? 79.8612;
+    return destinations.map((dest) => {
+      const dist = getHaversineDistance(lat, lng, dest.latitude, dest.longitude);
+      return { ...dest, distance: parseFloat(dist.toFixed(1)) };
+    });
+  }, [destinations, userLatitude, userLongitude]);
+
+  return {
+    userLatitude,
+    userLongitude,
+    destinations: mapDestinations,
+    permissionStatus,
+    fetchUserLocation,
+    toggleFavorite,
+  };
+}
+
+

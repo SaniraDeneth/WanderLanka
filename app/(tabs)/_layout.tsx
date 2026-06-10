@@ -46,6 +46,7 @@ export default function TabsLayout() {
       <MaterialTopTabs.Screen
         name="map"
         options={{
+          swipeEnabled: false,
           title: "Map",
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons name={focused ? "map" : "map-outline"} size={22} color={color} />

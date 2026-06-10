@@ -1,14 +1,17 @@
 import React from "react";
 import { View } from "react-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { twMerge } from "tailwind-merge";
+
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
   showGradients?: boolean;
   bottomPadding?: boolean;
+  className?: string;
 }
 
-export default function ScreenWrapper({ children, showGradients = true, bottomPadding = true }: ScreenWrapperProps) {
+export default function ScreenWrapper({ children, showGradients = true, bottomPadding = true, className: customClassName }: ScreenWrapperProps) {
   return (
     <View className="flex-1 bg-brand-offwhite">
       {/* SVG BACKGROUND OVERLAYS */}
@@ -48,7 +51,7 @@ export default function ScreenWrapper({ children, showGradients = true, bottomPa
       )}
 
       {/* Main Content Area */}
-      <View className={`flex-1 z-10 px-4 pt-safe ${bottomPadding ? "pb-safe" : ""}`}>
+      <View className={twMerge(`flex-1 z-10 px-4 pt-safe ${bottomPadding ? "pb-safe" : ""}`, customClassName)}>
         {children}
       </View>
     </View>

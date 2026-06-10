@@ -9,9 +9,16 @@ interface ScreenWrapperProps {
   showGradients?: boolean;
   bottomPadding?: boolean;
   className?: string;
+  noPadding?: boolean;
 }
 
-export default function ScreenWrapper({ children, showGradients = true, bottomPadding = true, className: customClassName }: ScreenWrapperProps) {
+export default function ScreenWrapper({
+  children,
+  showGradients = true,
+  bottomPadding = true,
+  className: customClassName,
+  noPadding = false,
+}: ScreenWrapperProps) {
   return (
     <View className="flex-1 bg-brand-offwhite">
       {/* SVG BACKGROUND OVERLAYS */}
@@ -51,7 +58,14 @@ export default function ScreenWrapper({ children, showGradients = true, bottomPa
       )}
 
       {/* Main Content Area */}
-      <View className={twMerge(`flex-1 z-10 px-4 pt-safe ${bottomPadding ? "pb-safe" : ""}`, customClassName)}>
+      <View
+        className={twMerge(
+          "flex-1 z-10",
+          !noPadding && "px-4 pt-safe",
+          !noPadding && bottomPadding && "pb-safe",
+          customClassName
+        )}
+      >
         {children}
       </View>
     </View>

@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFilterStore } from "../store/useFilterStore";
+import { planService } from "../services/planService";
 import { useLocationStore } from "../store/useLocationStore";
 import { getHaversineDistance, useWanderStore } from "../store/useWanderStore";
 
@@ -379,6 +380,63 @@ export function useMapScreenData() {
     permissionStatus,
     fetchUserLocation,
     toggleFavorite,
+  };
+}
+
+// Hook to retrieve full details of a specific Spot or Plan, including relations
+export function useDetailsScreenData(id: number, type: "SPOT" | "PLAN") {
+  const destinations = useWanderStore((s) => s.destinations);
+  const toggleFavorite = useWanderStore((s) => s.toggleFavorite);
+  const togglePlanFavorite = useWanderStore((s) => s.togglePlanFavorite);
+
+  const [planDetails, setPlanDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(type === "PLAN");
+
+  // Load detailed plan info (with nested destinations) if viewing a PLAN
+  useEffect(() => {
+    if (type === "PLAN") {
+      setLoading(true);
+      planService.fetchPlanDetails(id).then((details) => {
+        setPlanDetails(details);
+        setLoading(false);
+      }).catch(() => {
+        setLoading(false);
+      });
+    }
+  }, [id, type]);
+
+  // Resolve Spot Details from store if viewing a SPOT
+  const spotDetails = useMemo(() => {
+    if (type === "SPOT") {
+      return destinations.find((d) => d.id === id) || null;
+    }
+    return null;
+  }, [destinations, id, type]);
+
+  // Recommended spots (other spots in same category, excluding current spot)
+  const recommendedSpots = useMemo(() => {
+    if (type === "SPOT" && spotDetails) {
+      return destinations
+        .filter((d) => d.categoryId === spotDetails.categoryId && d.id !== id)
+        .slice(0, 3);
+    }
+    return [];
+  }, [destinations, spotDetails, id, type]);
+
+  const handleToggleFavorite = async () => {
+    if (type === "SPOT") {
+      await toggleFavorite(id);
+    } else {
+      await togglePlanFavorite(id);
+    }
+  };
+
+  return {
+    spotDetails,
+    planDetails,
+    recommendedSpots,
+    loading,
+    toggleFavorite: handleToggleFavorite,
   };
 }
 

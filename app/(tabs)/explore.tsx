@@ -1,26 +1,37 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useRef } from "react";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View, InteractionManager } from "react-native";
+import ExploreFilterModal from "../../components/explore/ExploreFilterModal";
 import WanderRow from "../../components/home/WanderRow";
 import ScreenWrapper from "../../components/ScreenWrapper";
-import ExploreFilterModal from "../../components/explore/ExploreFilterModal";
-import { useExploreScreenData } from "../../viewmodels/useDestinationViewModel";
 import { useFilterStore } from "../../store/useFilterStore";
+import { useExploreScreenData } from "../../viewmodels/useDestinationViewModel";
 
 export default function ExploreScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const searchInputRef = useRef<TextInput>(null);
+  const timerRef = useRef<any>(null);
 
   const focusRequested = useFilterStore((s) => s.exploreSearchFocusRequested);
   const setFocusRequested = useFilterStore((s) => s.setExploreSearchFocusRequested);
 
-  React.useEffect(() => {
+  // Clear timeout on screen unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (focusRequested) {
-      const timer = setTimeout(() => {
-        searchInputRef.current?.focus();
-        setFocusRequested(false);
-      }, 150);
-      return () => clearTimeout(timer);
+      // Use InteractionManager to wait for navigation transitions to complete
+      InteractionManager.runAfterInteractions(() => {
+        timerRef.current = setTimeout(() => {
+          searchInputRef.current?.focus();
+          // Reset the state after focusing to avoid re-render interrupting the focus
+          setFocusRequested(false);
+        }, 350);
+      });
     }
   }, [focusRequested, setFocusRequested]);
 
@@ -46,9 +57,6 @@ export default function ExploreScreen() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  const handleCardPress = (title: string) =>
-    Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
-
   return (
     <ScreenWrapper bottomPadding={false}>
       <KeyboardAvoidingView
@@ -67,8 +75,8 @@ export default function ExploreScreen() {
             onPress={() => setIsFiltersVisible(true)}
             hitSlop={8}
             className={`p-3 rounded-2xl border ${isFiltersVisible || hasActiveFilters
-                ? "bg-brand-black border-brand-black"
-                : "bg-white border-gray-200"
+              ? "bg-brand-black border-brand-black"
+              : "bg-white border-gray-200"
               } shadow-sm`}
           >
             <Ionicons
@@ -211,13 +219,13 @@ export default function ExploreScreen() {
                   <WanderRow
                     key={spot.id}
                     id={spot.id}
+                    type="SPOT"
                     title={spot.title}
                     imageUri={spot.imageUri}
                     rating={spot.rating}
                     vibeTag={spot.vibeTag}
                     isFavorite={spot.isFavorite}
                     distance={spot.distance}
-                    onPress={() => handleCardPress(spot.title)}
                     onToggleFavorite={() => toggleFavorite(spot.id)}
                   />
                 ))
@@ -242,6 +250,7 @@ export default function ExploreScreen() {
                   <WanderRow
                     key={plan.id}
                     id={plan.id}
+                    type="PLAN"
                     title={plan.title}
                     imageUri={plan.imageUri}
                     rating={plan.rating}
@@ -249,7 +258,6 @@ export default function ExploreScreen() {
                     duration={plan.duration}
                     budget={plan.budget ? `$${plan.budget}` : undefined}
                     description={plan.overview}
-                    onPress={() => handleCardPress(plan.title)}
                     onToggleFavorite={() => togglePlanFavorite(plan.id)}
                   />
                 ))

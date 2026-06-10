@@ -1,15 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import FavoriteButton from "../FavoriteButton";
 
 interface WanderRowProps {
   id: number;
+  type: "SPOT" | "PLAN";
   title: string;
   imageUri: string;
   rating: number;
   isFavorite: boolean;
-  onPress: () => void;
   onToggleFavorite: () => void;
   vibeTag?: string;
   distance?: number;
@@ -19,11 +20,12 @@ interface WanderRowProps {
 }
 
 export default function WanderRow({
+  id,
+  type,
   title,
   imageUri,
   rating,
   isFavorite,
-  onPress,
   onToggleFavorite,
   vibeTag,
   distance,
@@ -31,9 +33,18 @@ export default function WanderRow({
   budget,
   description,
 }: WanderRowProps) {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push({
+      pathname: "/details",
+      params: { id, type }
+    });
+  };
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       className="bg-white p-3 rounded-2xl border border-gray-100/60 shadow-sm flex-row items-center mb-3"
       style={{
         shadowColor: "#000",

@@ -1,15 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import FavoriteButton from "../FavoriteButton";
 
 interface WanderCardProps {
   id: number;
+  type: "SPOT" | "PLAN";
   title: string;
   imageUri: string;
   rating: number;
   isFavorite: boolean;
-  onPress: () => void;
   onToggleFavorite: () => void;
 
   duration?: string;
@@ -20,20 +21,30 @@ interface WanderCardProps {
 }
 
 export default function WanderCard({
+  id,
+  type,
   title,
   imageUri,
   rating,
   isFavorite,
-  onPress,
   onToggleFavorite,
   duration,
   overview,
   distance,
   entryFee,
 }: WanderCardProps) {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push({
+      pathname: "/details",
+      params: { id, type }
+    });
+  };
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       className="bg-white rounded-3xl overflow-hidden border border-gray-100/60 shadow-sm mb-4 active:scale-[0.99]"
       style={{
         shadowColor: "#000",

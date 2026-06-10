@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import { useRouter } from "expo-router";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useMapScreenData } from "../../viewmodels/useDestinationViewModel";
 
@@ -14,6 +15,7 @@ const SRI_LANKA_CENTER = {
 };
 
 export default function MapScreen() {
+  const router = useRouter();
   const mapRef = useRef<MapView>(null);
   const [selectedSpot, setSelectedSpot] = useState<any>(null);
 
@@ -48,8 +50,12 @@ export default function MapScreen() {
     }
   };
 
-  const handleCardPress = (title: string) =>
-    Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
+  const handleCardPress = (id: number, type: "SPOT" | "PLAN") => {
+    router.push({
+      pathname: "/details",
+      params: { id, type }
+    });
+  };
 
   const handleGetDirections = (latitude: number, longitude: number) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
@@ -188,7 +194,7 @@ export default function MapScreen() {
               </Pressable>
 
               <Pressable
-                onPress={() => handleCardPress(selectedSpot.title)}
+                onPress={() => handleCardPress(selectedSpot.id, "SPOT")}
                 className="flex-1 bg-brand-black py-2.5 rounded-xl flex-row items-center justify-center gap-2 active:scale-[0.98]"
               >
                 <Text className="font-bebas text-md text-white tracking-wider">

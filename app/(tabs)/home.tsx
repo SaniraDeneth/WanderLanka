@@ -81,8 +81,7 @@ export default function HomeScreen() {
 
 
 
-  const handleCardPress = (title: string) =>
-    Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
+
 
   const handleNotificationPress = () => {
     Alert.alert("Notifications", "No new notifications at the moment.");
@@ -289,12 +288,12 @@ export default function HomeScreen() {
             <WanderRow
               key={spot.id}
               id={spot.id}
+              type="SPOT"
               title={spot.title}
               imageUri={spot.imageUri}
               rating={spot.rating}
               vibeTag={spot.vibeTag}
               isFavorite={spot.isFavorite}
-              onPress={() => handleCardPress(spot.title)}
               onToggleFavorite={() => toggleFavorite(spot.id)}
             />
           ))}
@@ -310,13 +309,13 @@ export default function HomeScreen() {
             <WanderCard
               key={plan.id}
               id={plan.id}
+              type="PLAN"
               title={plan.title}
               overview={plan.overview}
               duration={plan.duration}
               rating={plan.rating}
               imageUri={plan.imageUri}
               isFavorite={plan.isFavorite}
-              onPress={() => handleCardPress(plan.title)}
               onToggleFavorite={() => togglePlanFavorite(plan.id)}
             />
           ))}

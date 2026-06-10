@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Alert, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useWanderStore } from "../../store/useWanderStore";
 import { useNearbyDestinations } from "../../viewmodels/useDestinationViewModel";
 import WanderCard from "./WanderCard";
@@ -12,11 +12,6 @@ interface NearbySpotsListProps {
 export default function NearbySpotsList({ refreshKey = 0 }: NearbySpotsListProps) {
   const toggleFavorite = useWanderStore((s) => s.toggleFavorite);
   const nearbySpots = useNearbyDestinations(refreshKey);
-
-  const handleCardPress = (title: string) =>
-    Alert.alert("Coming Soon", `${title} detail page coming in next phase.`);
-
-  // console.log("user", userLatitude, userLongitude)
 
   if (nearbySpots.length === 0) {
     return (
@@ -35,13 +30,13 @@ export default function NearbySpotsList({ refreshKey = 0 }: NearbySpotsListProps
         <WanderCard
           key={spot.id}
           id={spot.id}
+          type="SPOT"
           title={spot.title}
           imageUri={spot.imageUri}
           rating={spot.rating}
           distance={spot.distance}
           entryFee={spot.entryFee}
           isFavorite={spot.isFavorite}
-          onPress={() => handleCardPress(spot.title)}
           onToggleFavorite={() => toggleFavorite(spot.id)}
         />
       ))}

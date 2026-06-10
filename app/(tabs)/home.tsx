@@ -122,7 +122,10 @@ export default function HomeScreen() {
       {/* HEADER */}
       <View className="flex-row items-center justify-between py-3">
         {/* Avatar + Greeting */}
-        <View className="flex-row items-center">
+        <Pressable 
+          onPress={() => router.push("/profile")}
+          className="flex-row items-center active:scale-[0.95]"
+        >
           <View className="w-12 h-12 rounded-full border-2 border-brand-green bg-brand-mint items-center justify-center overflow-hidden mr-3">
             {profile?.avatar === "camera-photo" && profile.photoUri ? (
               <Image
@@ -148,7 +151,7 @@ export default function HomeScreen() {
               {profile?.name ? profile.name.toUpperCase() : "EXPLORER"}
             </Text>
           </View>
-        </View>
+        </Pressable>
 
         {/* Notification Bell */}
         <Pressable

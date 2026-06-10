@@ -5,7 +5,9 @@ import {
   ActivityIndicator, Image, Pressable,
   ScrollView,
   Text,
-  View
+  View,
+  Linking,
+  Alert
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ScreenWrapper from "../components/ScreenWrapper";
@@ -77,6 +79,16 @@ export default function DetailsScreen() {
     } else {
       router.replace("/(tabs)/home");
     }
+  };
+
+  const handleGetDirections = () => {
+    if (!spotDetails?.latitude || !spotDetails?.longitude) return;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${spotDetails.latitude},${spotDetails.longitude}`;
+
+    Linking.openURL(url).catch((err) => {
+      console.error("Failed to open directions link:", err);
+      Alert.alert("Directions Error", "Could not launch map directions.");
+    });
   };
 
   if (loading || !details) {
@@ -254,6 +266,22 @@ export default function DetailsScreen() {
           <Text className="font-montserrat text-sm text-gray-500 leading-relaxed">
             {isPlan ? planDetails.overview : spotDetails?.description}
           </Text>
+
+          {!isPlan && spotDetails?.latitude && (
+            <Pressable
+              onPress={handleGetDirections}
+              className="bg-brand-black py-4 rounded-2xl items-center justify-center mt-6 active:scale-[0.98] flex-row gap-2"
+              style={{
+                shadowColor: "#000",
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 4 },
+              }}
+            >
+              <Ionicons name="navigate" size={20} color="#FFFFFF" />
+              <Text className="font-bebas text-lg text-white tracking-wider mt-0.5">GET DIRECTIONS</Text>
+            </Pressable>
+          )}
         </View>
 
         {/* BOTTOM RELATION LIST */}

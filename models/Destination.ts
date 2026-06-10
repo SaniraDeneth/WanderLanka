@@ -1,5 +1,5 @@
 export interface Destination {
-  distance: number | undefined;
+  distance?: number;
   id: number;
   title: string;
   description: string;

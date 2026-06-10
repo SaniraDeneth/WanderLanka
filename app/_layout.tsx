@@ -5,9 +5,13 @@ import { useFonts } from "expo-font";
 import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { AppState } from "react-native";
+import * as Notifications from "expo-notifications";
 import BrandLoader from "../components/BrandLoader";
 import { useWanderStore } from "../store/useWanderStore";
 import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
+import { notificationService } from "../services/notificationService";
+import { useNotificationStore } from "../store/useNotificationStore";
 import "./global.css";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -51,6 +55,44 @@ function RootLayoutContent() {
     reloadProfile();
     initDatabase();
   }, [reloadProfile, initDatabase]);
+
+  // Notifications and AppState Listener Effect
+  useEffect(() => {
+    // 1. Request notifications permissions
+    notificationService.registerForPushNotificationsAsync();
+
+    // 2. Listen to received alerts when app is running (foreground or background)
+    const receivedSubscription = Notifications.addNotificationReceivedListener((notification) => {
+      const { title, body } = notification.request.content;
+      if (title && body) {
+        useNotificationStore.getState().addNotification(title, body);
+      }
+    });
+
+    // 3. Listen to tapped notification events
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const { title, body } = response.notification.request.content;
+      if (title && body) {
+        useNotificationStore.getState().addNotification(title, body);
+      }
+      // Can redirect to home or explore if needed
+    });
+
+    // 4. Schedule randomized alerts when user suspends app to background
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === "background") {
+        notificationService.scheduleRandomEngagementAlerts();
+      }
+    };
+
+    const appStateSubscription = AppState.addEventListener("change", handleAppStateChange);
+
+    return () => {
+      receivedSubscription.remove();
+      responseSubscription.remove();
+      appStateSubscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (profileLoading || dbLoading) return;

@@ -3,23 +3,25 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import heroImage from "../../assets/images/ui/misty-mountain.png";
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import heroImage from "../../assets/images/ui/misty-mountain.png";
 import CategoryCircle from "../../components/home/CategoryCircle";
-import WanderRow from "../../components/home/WanderRow";
-import NearbySpotsList from "../../components/home/NearbySpotsList";
-import SectionHeader from "../../components/home/SectionHeader";
 import FilterChip from "../../components/home/FilterChip";
+import NearbySpotsList from "../../components/home/NearbySpotsList";
+import NotificationInboxModal from "../../components/home/NotificationInboxModal";
+import SectionHeader from "../../components/home/SectionHeader";
 import WanderCard from "../../components/home/WanderCard";
+import WanderRow from "../../components/home/WanderRow";
+import { useFilterStore } from "../../store/useFilterStore";
+import { useNotificationStore } from "../../store/useNotificationStore";
 import {
   useDestinationActions,
-  useHomeFilters,
   useDiscoverPlans,
+  useHomeFilters,
   usePopularDestinations,
 } from "../../viewmodels/useDestinationViewModel";
 import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
-import { useFilterStore } from "../../store/useFilterStore";
 
 const AVATARS_MAP: Record<string, string> = {
   person: "person-outline",
@@ -67,6 +69,10 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const [isNotificationModalVisible, setIsNotificationModalVisible] = useState(false);
+  const notifications = useNotificationStore((s) => s.notifications);
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchUserLocation().finally(() => {
@@ -84,7 +90,7 @@ export default function HomeScreen() {
 
 
   const handleNotificationPress = () => {
-    Alert.alert("Notifications", "No new notifications at the moment.");
+    setIsNotificationModalVisible(true);
   }
 
   const handleSearchPress = () => {
@@ -122,7 +128,7 @@ export default function HomeScreen() {
       {/* HEADER */}
       <View className="flex-row items-center justify-between py-3">
         {/* Avatar + Greeting */}
-        <Pressable 
+        <Pressable
           onPress={() => router.push("/profile")}
           className="flex-row items-center active:scale-[0.95]"
         >
@@ -164,8 +170,10 @@ export default function HomeScreen() {
             shadowOffset: { width: 0, height: 2 },
           }}
         >
-          <Ionicons name="notifications-outline" size={18} color="#1a1a1a" />
-          <View className="absolute top-2 right-2.5 w-2 h-2 bg-brand-green rounded-full border border-white" />
+          <Ionicons name="notifications-outline" size={18} color="#228B22" />
+          {unreadCount > 0 && (
+            <View className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-brand-green" />
+          )}
         </Pressable>
       </View>
 
@@ -324,6 +332,11 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
+      {/* Notification Inbox Sheet */}
+      <NotificationInboxModal
+        visible={isNotificationModalVisible}
+        onClose={() => setIsNotificationModalVisible(false)}
+      />
     </ScreenWrapper>
   );
 }

@@ -11,4 +11,5 @@ export interface Destination {
   rating: number;
   entryFee: string;
   isFavorite: boolean;
+  dayNumber?: number;
 }

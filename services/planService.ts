@@ -61,6 +61,7 @@ export const planService = {
         rating: row.rating,
         entryFee: row.entry_fee,
         isFavorite: row.is_favorite === 1,
+        dayNumber: row.day_number,
       }));
 
       return {

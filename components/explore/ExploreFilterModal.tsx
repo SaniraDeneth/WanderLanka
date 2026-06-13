@@ -18,7 +18,7 @@ import {
   useDestinationActions,
 } from "../../viewmodels/useDestinationViewModel";
 
-const VIBES = ["NATURE", "CULTURE", "ADVENTURE"];
+const VIBES = ["NATURE", "CULTURE", "ADVENTURE", "RELAX", "LUXURY"];
 
 interface ExploreFilterModalProps {
   visible: boolean;

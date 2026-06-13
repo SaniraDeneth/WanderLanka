@@ -1,5 +1,5 @@
-import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
+import { getLocalImage } from "../../utils/imageMap";
 
 interface CategoryCircleProps {
   name: string;
@@ -23,7 +23,7 @@ export default function CategoryCircle({
       >
         <View className="w-15 h-15 rounded-full overflow-hidden border-2 border-white shadow-sm">
           <Image
-            source={{ uri: imageUri }}
+            source={getLocalImage(imageUri)}
             className="w-full h-full"
             resizeMode="cover"
           />

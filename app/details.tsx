@@ -16,6 +16,7 @@ import FavoriteButton from "../components/FavoriteButton";
 import { useWanderStore, getHaversineDistance } from "../store/useWanderStore";
 import { useLocationStore } from "../store/useLocationStore";
 import { useDetailsScreenData } from "../viewmodels/useDestinationViewModel";
+import { getLocalImage } from "../utils/imageMap";
 
 export default function DetailsScreen() {
   const router = useRouter();
@@ -216,7 +217,7 @@ export default function DetailsScreen() {
         {/* HERO IMAGE */}
         <View className="w-full h-80 relative">
           <Image
-            source={{ uri: details.imageUri }}
+            source={getLocalImage(details.imageUri)}
             className="w-full h-full"
             resizeMode="cover"
           />
@@ -296,7 +297,7 @@ export default function DetailsScreen() {
                 key={item.id}
                 id={item.id}
                 type="SPOT"
-                title={isPlan ? `DAY ${index + 1}: ${item.title}` : item.title}
+                title={isPlan ? `DAY ${item.dayNumber || index + 1}: ${item.title}` : item.title}
                 imageUri={item.imageUri}
                 rating={item.rating}
                 isFavorite={item.isFavorite}

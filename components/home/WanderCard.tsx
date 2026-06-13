@@ -3,6 +3,7 @@ import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import FavoriteButton from "../FavoriteButton";
+import { getLocalImage } from "../../utils/imageMap";
 
 interface WanderCardProps {
   id: number;
@@ -56,7 +57,7 @@ export default function WanderCard({
       {/* Full-width Image Area */}
       <View className="relative h-48">
         <Image
-          source={{ uri: imageUri }}
+          source={getLocalImage(imageUri)}
           className="w-full h-full"
           resizeMode="cover"
         />

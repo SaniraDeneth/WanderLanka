@@ -35,7 +35,7 @@ const AVATARS_MAP: Record<string, string> = {
   umbrella: "umbrella-outline",
 };
 
-const VIBES = ["NATURE", "CULTURE", "ADVENTURE"];
+const VIBES = ["NATURE", "CULTURE", "ADVENTURE", "RELAX", "LUXURY"];
 
 
 
@@ -228,7 +228,7 @@ export default function HomeScreen() {
                 <Text className="font-bebas text-3xl text-white mb-3">MISTY MOUNTAINS</Text>
                 <Button
                   title="START EXPLORING"
-                  onPress={() => router.push("/explore")}
+                  onPress={() => router.push({ pathname: "/details", params: { id: 7, type: "PLAN" } })}
                   className="bg-brand-green px-6 py-2"
                   textClassName="text-2xl tracking-normal"
                 />
@@ -316,7 +316,7 @@ export default function HomeScreen() {
             title="DISCOVER PLANS"
             onSeeAll={handlePlansSeeAll}
           />
-          {plans.map((plan) => (
+          {plans.slice(0, 3).map((plan) => (
             <WanderCard
               key={plan.id}
               id={plan.id}

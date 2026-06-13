@@ -21,7 +21,7 @@ export default function WelcomeScreen() {
           <BrandLoader className="absolute inset-0 bg-brand-offwhite/50" size="large" />
         )}
         <Image
-          source={require("../assets/images/welcome-hero.png")}
+          source={require("../assets/images/ui/welcome-hero.png")}
           className="w-full h-full"
           resizeMode="contain"
           onLoad={() => setImageLoaded(true)}

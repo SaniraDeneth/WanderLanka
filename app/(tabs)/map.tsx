@@ -5,6 +5,7 @@ import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { useRouter } from "expo-router";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useMapScreenData } from "../../viewmodels/useDestinationViewModel";
+import { getLocalImage } from "../../utils/imageMap";
 
 // Default map boundaries centered on Sri Lanka
 const SRI_LANKA_CENTER = {
@@ -158,7 +159,7 @@ export default function MapScreen() {
             <View className="flex-row items-center mb-3">
               {/* Image Thumbnail */}
               <Image
-                source={{ uri: selectedSpot.imageUri }}
+                source={getLocalImage(selectedSpot.imageUri)}
                 className="w-16 h-16 rounded-2xl bg-gray-100 mr-4"
                 resizeMode="cover"
               />

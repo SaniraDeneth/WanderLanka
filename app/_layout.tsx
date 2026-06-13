@@ -2,16 +2,16 @@ import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { Montserrat_400Regular, Montserrat_700Bold } from "@expo-google-fonts/montserrat";
 import { useAssets } from "expo-asset";
 import { useFonts } from "expo-font";
+import * as Notifications from "expo-notifications";
 import { Stack, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { AppState } from "react-native";
-import * as Notifications from "expo-notifications";
 import BrandLoader from "../components/BrandLoader";
-import { useWanderStore } from "../store/useWanderStore";
-import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
 import { notificationService } from "../services/notificationService";
 import { useNotificationStore } from "../store/useNotificationStore";
+import { useWanderStore } from "../store/useWanderStore";
+import { useProfileViewModel } from "../viewmodels/useProfileViewModel";
 import "./global.css";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -25,7 +25,7 @@ export default function RootLayout() {
   });
 
   const [assets, assetsError] = useAssets([
-    require("../assets/images/welcome-hero.png"),
+    require("../assets/images/ui/welcome-hero.png"),
   ]);
 
   const isLoaded = fontsLoaded && assets;

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { Logger } from "../utils/logger";
 import * as Location from "expo-location";
 import { Alert, Linking } from "react-native";
 
@@ -19,7 +20,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   loading: false,
 
   setUserLocation: (latitude, longitude) => {
-    console.log(`[Location Store] Store updated to: Lat=${latitude}, Lng=${longitude}`);
+    Logger.log(`[Location Store] Store updated to: Lat=${latitude}, Lng=${longitude}`);
     set({ userLatitude: latitude, userLongitude: longitude });
   },
 
@@ -49,7 +50,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
             );
           }, 500);
         }
-        console.log("[Location Store] Location permission denied. Using Colombo fallback.");
+        Logger.log("[Location Store] Location permission denied. Using Colombo fallback.");
         get().setUserLocation(6.9271, 79.8612);
         return;
       }
@@ -58,10 +59,10 @@ export const useLocationStore = create<LocationState>((set, get) => ({
         accuracy: Location.Accuracy.Balanced,
       });
 
-      console.log(`[Location Store] Live device coordinates: Lat=${location.coords.latitude}, Lng=${location.coords.longitude}`);
+      Logger.log(`[Location Store] Live device coordinates: Lat=${location.coords.latitude}, Lng=${location.coords.longitude}`);
       get().setUserLocation(location.coords.latitude, location.coords.longitude);
     } catch (error) {
-      console.error("[Location Store] fetchUserLocation error:", error);
+      Logger.error("[Location Store] fetchUserLocation error:", error);
       set({ permissionStatus: "denied" });
       get().setUserLocation(6.9271, 79.8612);
     } finally {

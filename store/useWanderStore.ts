@@ -3,6 +3,7 @@ import { Category } from "../models/Category";
 import { Destination } from "../models/Destination";
 import { Plan } from "../models/Plan";
 import { dbService } from "../services/dbService";
+import { Logger } from "../utils/logger";
 import { destinationService } from "../services/destinationService";
 import { planService } from "../services/planService";
 
@@ -60,7 +61,7 @@ export const useWanderStore = create<WanderState>((set, get) => ({
       await dbService.initDatabase();
       await get().loadData();
     } catch (error) {
-      console.error("[useWanderStore] Database setup error:", error);
+      Logger.error("[useWanderStore] Database setup error:", error);
     } finally {
       set({ loading: false });
     }

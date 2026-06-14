@@ -3,6 +3,7 @@ import { Alert, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useProfileViewModel } from "./useProfileViewModel";
+import { Logger } from "../utils/logger";
 
 export function useOnboardingViewModel() {
   const router = useRouter();
@@ -53,7 +54,7 @@ export function useOnboardingViewModel() {
         Alert.alert("Success", "Profile photo successfully updated!");
       }
     } catch (error) {
-      console.error(`Error selecting photo via ${permissionType}:`, error);
+      Logger.error(`Error selecting photo via ${permissionType}:`, error);
       Alert.alert("Error", `Could not access ${permissionType}. Please try again.`);
     }
   };
@@ -123,7 +124,7 @@ export function useOnboardingViewModel() {
         Alert.alert("Error", "Could not complete onboarding. Please try again.");
       }
     } catch (error) {
-      console.error("Error saving profile details:", error);
+      Logger.error("Error saving profile details:", error);
       setIsSaving(false);
       Alert.alert("Error", "Could not complete onboarding. Please try again.");
     }

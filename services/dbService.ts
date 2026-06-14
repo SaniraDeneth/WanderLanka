@@ -1,5 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { categoriesSeed, destinationsSeed, plansSeed, planDestinationsSeed } from "../data/seedData";
+import { Logger } from "../utils/logger";
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 
 export const dbService = {
@@ -79,7 +80,7 @@ export const dbService = {
       }
 
       if (needSeed) {
-        console.log("[dbService] Database out of date. Dropping and re-seeding...");
+        Logger.log("[dbService] Database out of date. Dropping and re-seeding...");
         
         // Drop tables to ensure clean state
         await db.execAsync("DROP TABLE IF EXISTS plan_destinations;");
@@ -134,12 +135,12 @@ export const dbService = {
         `);
 
         await this.seedData(db);
-        console.log("[dbService] Database seeding completed successfully.");
+        Logger.log("[dbService] Database seeding completed successfully.");
       } else {
-        console.log("[dbService] Database perfectly seeded with all 97 spots.");
+        Logger.log("[dbService] Database perfectly seeded with all 97 spots.");
       }
     } catch (error) {
-      console.error("[dbService] Initialization failed:", error);
+      Logger.error("[dbService] Initialization failed:", error);
       throw error;
     }
   },

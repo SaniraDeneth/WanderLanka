@@ -2,12 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { withLayoutContext } from 'expo-router';
 import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
 export const MaterialTopTabs = withLayoutContext(Navigator);
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <MaterialTopTabs
       tabBarPosition="bottom"

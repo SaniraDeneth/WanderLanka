@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { twMerge } from "tailwind-merge";
 
@@ -19,6 +20,8 @@ export default function ScreenWrapper({
   className: customClassName,
   noPadding = false,
 }: ScreenWrapperProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <View className="flex-1 bg-brand-offwhite">
       {/* SVG BACKGROUND OVERLAYS */}
@@ -61,10 +64,13 @@ export default function ScreenWrapper({
       <View
         className={twMerge(
           "flex-1 z-10",
-          !noPadding && "px-4 pt-safe",
-          !noPadding && bottomPadding && "pb-safe",
+          !noPadding && "px-4",
           customClassName
         )}
+        style={{
+          paddingTop: !noPadding ? insets.top : 0,
+          paddingBottom: !noPadding && bottomPadding ? (insets.bottom > 0 ? insets.bottom : 16) : 0,
+        }}
       >
         {children}
       </View>

@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Logger } from "../utils/logger";
 import { Paths, File } from "expo-file-system";
 import { UserProfile } from "../models/UserProfile";
 
@@ -11,7 +12,7 @@ export const profileService = {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error("Error loading profile from AsyncStorage:", error);
+      Logger.error("Error loading profile from AsyncStorage:", error);
       return null;
     }
   },
@@ -42,7 +43,7 @@ export const profileService = {
               oldFile.delete();
             }
           } catch (deleteError) {
-            console.error("Failed to delete old profile photo:", deleteError);
+            Logger.error("Failed to delete old profile photo:", deleteError);
           }
         }
       } 
@@ -54,7 +55,7 @@ export const profileService = {
             oldFile.delete();
           }
         } catch (deleteError) {
-          console.error("Failed to delete profile photo file on clear:", deleteError);
+          Logger.error("Failed to delete profile photo file on clear:", deleteError);
         }
       }
 
@@ -66,7 +67,7 @@ export const profileService = {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profileToSave));
       return true;
     } catch (error) {
-      console.error("Error saving profile to AsyncStorage:", error);
+      Logger.error("Error saving profile to AsyncStorage:", error);
       return false;
     }
   },
@@ -84,17 +85,15 @@ export const profileService = {
             fileToDelete.delete();
           }
         } catch (deleteError) {
-          console.error("Failed to delete profile photo file on profile deletion:", deleteError);
+          Logger.error("Failed to delete profile photo file on profile deletion:", deleteError);
         }
       }
 
       await AsyncStorage.removeItem(STORAGE_KEY);
       return true;
     } catch (error) {
-      console.error("Error deleting profile from AsyncStorage:", error);
+      Logger.error("Error deleting profile from AsyncStorage:", error);
       return false;
     }
   }
 };
-
-

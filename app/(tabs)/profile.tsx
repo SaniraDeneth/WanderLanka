@@ -18,6 +18,7 @@ import ScreenWrapper from "../../components/ScreenWrapper";
 import WanderRow from "../../components/home/WanderRow";
 import { useFilterStore } from "../../store/useFilterStore";
 import { useWanderStore } from "../../store/useWanderStore";
+import { Logger } from "../../utils/logger";
 import { useProfileViewModel } from "../../viewmodels/useProfileViewModel";
 
 const AVATARS = [
@@ -103,7 +104,7 @@ export default function ProfileScreen() {
         setEditPhotoUri(result.assets[0].uri);
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
   };
 
@@ -125,7 +126,7 @@ export default function ProfileScreen() {
         setEditPhotoUri(result.assets[0].uri);
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
   };
 

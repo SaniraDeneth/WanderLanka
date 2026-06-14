@@ -17,6 +17,7 @@ import { useWanderStore, getHaversineDistance } from "../store/useWanderStore";
 import { useLocationStore } from "../store/useLocationStore";
 import { useDetailsScreenData } from "../viewmodels/useDestinationViewModel";
 import { getLocalImage } from "../utils/imageMap";
+import { Logger } from "../utils/logger";
 
 export default function DetailsScreen() {
   const router = useRouter();
@@ -87,7 +88,7 @@ export default function DetailsScreen() {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${spotDetails.latitude},${spotDetails.longitude}`;
 
     Linking.openURL(url).catch((err) => {
-      console.error("Failed to open directions link:", err);
+      Logger.error("Failed to open directions link:", err);
       Alert.alert("Directions Error", "Could not launch map directions.");
     });
   };

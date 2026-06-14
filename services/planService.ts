@@ -1,6 +1,7 @@
 import { Destination } from "../models/Destination";
 import { Plan } from "../models/Plan";
 import { dbService } from "./dbService";
+import { Logger } from "../utils/logger";
 
 export const planService = {
   //Retrieves all travel plans from the SQLite database.
@@ -19,7 +20,7 @@ export const planService = {
         budget: row.budget,
       }));
     } catch (error) {
-      console.error("Error fetching plans from SQLite:", error);
+      Logger.error("Error fetching plans from SQLite:", error);
       return [];
     }
   },
@@ -76,7 +77,7 @@ export const planService = {
         destinations,
       };
     } catch (error) {
-      console.error(`Error fetching details for plan ID ${planId}:`, error);
+      Logger.error(`Error fetching details for plan ID ${planId}:`, error);
       return null;
     }
   },
@@ -93,7 +94,7 @@ export const planService = {
       );
       return true;
     } catch (error) {
-      console.error(`Error toggling plan favorite status in SQLite for id ${id}:`, error);
+      Logger.error(`Error toggling plan favorite status in SQLite for id ${id}:`, error);
       return false;
     }
   }

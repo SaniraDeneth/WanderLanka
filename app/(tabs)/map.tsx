@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useMapScreenData } from "../../viewmodels/useDestinationViewModel";
 import { getLocalImage } from "../../utils/imageMap";
+import { Logger } from "../../utils/logger";
 
 // Default map boundaries centered on Sri Lanka
 const SRI_LANKA_CENTER = {
@@ -62,8 +63,8 @@ export default function MapScreen() {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
 
     Linking.openURL(url).catch((err) => {
-      console.error("Failed to open directions link:", err);
-      Alert.alert("Directions Error", "Could not launch map directions.");
+      Logger.error("Failed to open directions link:", err);
+      Alert.alert("Error", "Could not launch map directions.");
     });
   };
 

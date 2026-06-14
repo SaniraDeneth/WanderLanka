@@ -1,4 +1,5 @@
 import { dbService } from "./dbService";
+import { Logger } from "../utils/logger";
 import { Destination } from "../models/Destination";
 import { Category } from "../models/Category";
 
@@ -22,7 +23,7 @@ export const destinationService = {
         isFavorite: row.is_favorite === 1,
       }));
     } catch (error) {
-      console.error("Error fetching destinations from SQLite:", error);
+      Logger.error("Error fetching destinations from SQLite:", error);
       return [];
     }
   },
@@ -38,7 +39,7 @@ export const destinationService = {
         imageUri: row.image_uri,
       }));
     } catch (error) {
-      console.error("Error fetching categories from SQLite:", error);
+      Logger.error("Error fetching categories from SQLite:", error);
       return [];
     }
   },
@@ -55,7 +56,7 @@ export const destinationService = {
       );
       return true;
     } catch (error) {
-      console.error(`Error toggling favorite status in SQLite for id ${id}:`, error);
+      Logger.error(`Error toggling favorite status in SQLite for id ${id}:`, error);
       return false;
     }
   }

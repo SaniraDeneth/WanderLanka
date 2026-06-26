@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, { Marker, Callout, PROVIDER_DEFAULT } from "react-native-maps";
 import { useRouter } from "expo-router";
 import ScreenWrapper from "../../components/ScreenWrapper";
+import BrandLoader from "../../components/BrandLoader";
 import { useMapScreenData } from "../../viewmodels/useDestinationViewModel";
+import { getHaversineDistance } from "../../store/useWanderStore";
 import { getLocalImage } from "../../utils/imageMap";
 import { Logger } from "../../utils/logger";
 
@@ -16,10 +18,13 @@ const SRI_LANKA_CENTER = {
   longitudeDelta: 2.8,
 };
 
+
+
 export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
   const [selectedSpot, setSelectedSpot] = useState<any>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   const {
     userLatitude,
@@ -32,6 +37,26 @@ export default function MapScreen() {
   useEffect(() => {
     fetchUserLocation();
   }, [fetchUserLocation]);
+
+  useEffect(() => {
+    // Delay rendering the MapView slightly until transition finishes to avoid navigation lag
+    const timer = setTimeout(() => {
+      setMapReady(true);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Compute selected spot distance on demand
+  const selectedSpotDistanceText = useMemo(() => {
+    if (!selectedSpot || userLatitude === null || userLongitude === null) return "N/A";
+    const dist = getHaversineDistance(
+      userLatitude,
+      userLongitude,
+      selectedSpot.latitude,
+      selectedSpot.longitude
+    );
+    return `${dist.toFixed(1)} KM`;
+  }, [selectedSpot, userLatitude, userLongitude]);
 
   const handleCenterUser = () => {
     if (permissionStatus !== "granted") {
@@ -82,44 +107,53 @@ export default function MapScreen() {
 
       {/* MAP VIEW CONTAINER */}
       <View className="flex-1 overflow-hidden border border-gray-150 shadow-md relative">
-        <MapView
-          ref={mapRef}
-          provider={PROVIDER_DEFAULT}
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={SRI_LANKA_CENTER}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
-          showsCompass={false}
-          onPress={() => setSelectedSpot(null)}
-        >
-          {destinations.map((dest) => (
-            <Marker
-              key={dest.id}
-              coordinate={{ latitude: dest.latitude, longitude: dest.longitude }}
-              onPress={(e) => {
-                e.stopPropagation();
-                setSelectedSpot(dest);
-                // Animate and center to marker coordinates
-                mapRef.current?.animateToRegion(
-                  {
-                    latitude: dest.latitude,
-                    longitude: dest.longitude,
-                    latitudeDelta: 0.04,
-                    longitudeDelta: 0.04,
-                  },
-                  500
-                );
-              }}
-            >
-              <View className="items-center justify-center">
-                <View className="bg-brand-black border border-brand-green/30 p-2 rounded-full shadow-lg">
-                  <Ionicons name="compass" size={14} color="#A8D030" />
-                </View>
-                <View className="w-1.5 h-1.5 bg-brand-green rounded-full -mt-0.5 shadow-sm" />
-              </View>
-            </Marker>
-          ))}
-        </MapView>
+        {mapReady ? (
+          <MapView
+            ref={mapRef}
+            provider={PROVIDER_DEFAULT}
+            style={StyleSheet.absoluteFillObject}
+            initialRegion={SRI_LANKA_CENTER}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+            showsCompass={false}
+            onPress={(e) => {
+              // Only clear the selected spot if the user clicked on the map itself, not a marker
+              if (e.nativeEvent && e.nativeEvent.action !== 'marker-press') {
+                setSelectedSpot(null);
+              }
+            }}
+          >
+            {destinations.map((dest) => (
+              <Marker
+                key={dest.id}
+                coordinate={{ latitude: dest.latitude, longitude: dest.longitude }}
+                pinColor="green"
+                onPress={(e) => {
+                  if (e && e.stopPropagation) {
+                    e.stopPropagation();
+                  }
+                  setSelectedSpot(dest);
+                  // Animate and center to marker coordinates
+                  mapRef.current?.animateToRegion(
+                    {
+                      latitude: dest.latitude,
+                      longitude: dest.longitude,
+                      latitudeDelta: 0.04,
+                      longitudeDelta: 0.04,
+                    },
+                    500
+                  );
+                }}
+              >
+                <Callout tooltip={true}>
+                  <View />
+                </Callout>
+              </Marker>
+            ))}
+          </MapView>
+        ) : (
+          <BrandLoader className="flex-1 bg-brand-offwhite" />
+        )}
 
         {/* FLOATING GPS CENTER BUTTON */}
         <Pressable
@@ -177,7 +211,7 @@ export default function MapScreen() {
                     ★ {selectedSpot.rating.toFixed(1)}
                   </Text>
                   <Text className="text-[10px] font-montserrat text-gray-400">
-                    {selectedSpot.distance} km away
+                    {selectedSpotDistanceText} away
                   </Text>
                 </View>
               </View>

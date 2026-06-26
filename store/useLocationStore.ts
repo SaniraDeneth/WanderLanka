@@ -13,6 +13,20 @@ interface LocationState {
   fetchUserLocation: (showDeniedAlert?: boolean) => Promise<void>;
 }
 
+function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export const useLocationStore = create<LocationState>((set, get) => ({
   userLatitude: null,
   userLongitude: null,
@@ -20,6 +34,15 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   loading: false,
 
   setUserLocation: (latitude, longitude) => {
+    const currentLat = get().userLatitude;
+    const currentLng = get().userLongitude;
+    if (currentLat !== null && currentLng !== null) {
+      const distance = getDistanceInKm(currentLat, currentLng, latitude, longitude);
+      if (distance < 0.1) {
+        Logger.log(`[Location Store] Ignored minor location change (${(distance * 1000).toFixed(0)}m) to prevent layout churn.`);
+        return;
+      }
+    }
     Logger.log(`[Location Store] Store updated to: Lat=${latitude}, Lng=${longitude}`);
     set({ userLatitude: latitude, userLongitude: longitude });
   },

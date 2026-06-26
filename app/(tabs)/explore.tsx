@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View, InteractionManager } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View, InteractionManager, RefreshControl } from "react-native";
 import ExploreFilterModal from "../../components/explore/ExploreFilterModal";
 import WanderRow from "../../components/home/WanderRow";
 import ScreenWrapper from "../../components/ScreenWrapper";
@@ -51,6 +51,18 @@ export default function ExploreScreen() {
     toggleFavorite,
     togglePlanFavorite,
   } = useExploreScreenData();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [dragY, setDragY] = useState(0);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    handleClearAllFilters();
+    setTimeout(() => {
+      setRefreshing(false);
+      setDragY(0);
+    }, 800);
+  };
 
   const handleTabChange = (tab: "SPOTS" | "PLANS") => {
     changeTab(tab);
@@ -150,41 +162,43 @@ export default function ExploreScreen() {
           filteredPlansCount={filteredPlans.length}
         />
 
+        {/* Floating Pull-to-Clear Indicators (Only when pulling and filters are active) */}
+        {hasActiveFilters && dragY < -15 && (
+          <View className="absolute top-[220px] left-0 right-0 z-50 items-center justify-center pointer-events-none">
+            <View className="bg-brand-green px-4 py-2.5 rounded-full shadow-lg shadow-black/10 flex-row items-center gap-1.5 border border-brand-green/20">
+              <Ionicons 
+                name={dragY < -65 ? "refresh-circle-outline" : "arrow-down-circle-outline"} 
+                size={14} 
+                color="#FFFFFF" 
+              />
+              <Text className="font-bebas text-md text-white tracking-wider">
+                {dragY < -65 ? "RELEASE TO CLEAR FILTERS" : "PULL DOWN TO CLEAR FILTERS"}
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* LIST SCROLL CONTAINER */}
         <ScrollView
           ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 24 }}
-          onScroll={(e) => {
-            setScrollY(e.nativeEvent.contentOffset.y);
-          }}
           scrollEventThrottle={16}
-          onScrollEndDrag={(e) => {
-            if (e.nativeEvent.contentOffset.y < -70) {
-              handleClearAllFilters();
-            }
+          onScroll={(e) => {
+            setDragY(e.nativeEvent.contentOffset.y);
           }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor="#6B7280"
+              colors={["#228B22"]} // Android green loading spinner
+              title="Release to clear filters"
+            />
+          }
         >
           <View style={{ position: "relative" }}>
-            {/* Pull-down gesture indicator */}
-            {scrollY < 0 && (
-              <View
-                style={{
-                  position: "absolute",
-                  top: -35,
-                  left: 0,
-                  right: 0,
-                  height: 30,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text className="font-bebas text-xs text-gray-400 tracking-wider">
-                  {scrollY < -60 ? "RELEASE TO REMOVE ALL FILTERS" : "SWIPE DOWN TO REMOVE ALL FILTERS"}
-                </Text>
-              </View>
-            )}
 
             {/* RESULTS COUNT & HEADER */}
             <View className="flex-row justify-between items-center mb-4">

@@ -1,14 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import MapView, { Marker, Callout, PROVIDER_DEFAULT } from "react-native-maps";
 import { useRouter } from "expo-router";
-import ScreenWrapper from "../../components/ScreenWrapper";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import MapView, { Callout, Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import BrandLoader from "../../components/BrandLoader";
-import { useMapScreenData } from "../../viewmodels/useDestinationViewModel";
+import Button from "../../components/Button";
+import ScreenWrapper from "../../components/ScreenWrapper";
 import { getHaversineDistance } from "../../store/useWanderStore";
 import { getLocalImage } from "../../utils/imageMap";
 import { Logger } from "../../utils/logger";
+import { useMapScreenData } from "../../viewmodels/useDestinationViewModel";
 
 // Default map boundaries centered on Sri Lanka
 const SRI_LANKA_CENTER = {
@@ -106,7 +107,7 @@ export default function MapScreen() {
       </View>
 
       {/* MAP VIEW CONTAINER */}
-      <View className="flex-1 overflow-hidden border border-gray-150 shadow-md relative">
+      <View className="flex-1 overflow-hidden relative">
         {mapReady ? (
           <MapView
             ref={mapRef}
@@ -219,24 +220,23 @@ export default function MapScreen() {
 
             {/* Bottom Row: Actions */}
             <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={() => handleGetDirections(selectedSpot.latitude, selectedSpot.longitude)}
-                className="flex-1 bg-brand-green py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-[0.98]"
-              >
-                <Ionicons name="navigate" size={14} color="#000000" />
-                <Text className="font-bebas text-md text-brand-black tracking-wider">
-                  GET DIRECTIONS
-                </Text>
-              </Pressable>
+              <View className="flex-1">
+                <Button
+                  title="GET DIRECTIONS"
+                  onPress={() => handleGetDirections(selectedSpot.latitude, selectedSpot.longitude)}
+                  className="bg-brand-green py-2 px-0 w-full"
+                  textClassName="text-xl text-brand-black tracking-wider"
+                />
+              </View>
 
-              <Pressable
-                onPress={() => handleCardPress(selectedSpot.id, "SPOT")}
-                className="flex-1 bg-brand-black py-2.5 rounded-xl flex-row items-center justify-center gap-2 active:scale-[0.98]"
-              >
-                <Text className="font-bebas text-md text-white tracking-wider">
-                  VIEW DETAILS
-                </Text>
-              </Pressable>
+              <View className="flex-1">
+                <Button
+                  title="VIEW DETAILS"
+                  onPress={() => handleCardPress(selectedSpot.id, "SPOT")}
+                  className="bg-brand-black py-2 px-0 w-full"
+                  textClassName="text-xl text-white tracking-wider"
+                />
+              </View>
             </View>
           </View>
         )}

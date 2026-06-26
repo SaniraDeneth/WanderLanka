@@ -79,7 +79,7 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             await clearProfile();
-            router.replace("/onboarding");
+            router.replace("/");
           },
         },
       ]
@@ -400,7 +400,7 @@ export default function ProfileScreen() {
                 {/* Image Picker Button */}
                 <Pressable
                   onPress={handlePickImage}
-                  className={`w-full flex-row items-center justify-center bg-white border border-gray-200/80 py-4 px-6 rounded-2xl shadow-sm mb-6 ${editAvatar === "camera-photo" ? "border-brand-green bg-brand-green/5" : ""
+                  className={`w-full flex-row items-center justify-center bg-white border border-gray-200/80 py-4 px-6 rounded-2xl mb-6 ${editAvatar === "camera-photo" ? "border-brand-green bg-brand-green/5" : ""
                     } active:scale-[0.98]`}
                 >
                   <Ionicons

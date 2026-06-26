@@ -34,6 +34,7 @@ interface WanderState {
   loading: boolean;
 
   initDatabase: () => Promise<void>;
+  resetDatabase: () => Promise<void>;
   loadData: () => Promise<void>;
   toggleFavorite: (id: number) => Promise<void>;
   togglePlanFavorite: (id: number) => Promise<void>;
@@ -62,6 +63,18 @@ export const useWanderStore = create<WanderState>((set, get) => ({
       await get().loadData();
     } catch (error) {
       Logger.error("[useWanderStore] Database setup error:", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  resetDatabase: async () => {
+    set({ loading: true });
+    try {
+      await dbService.resetDatabase();
+      await get().loadData();
+    } catch (error) {
+      Logger.error("[useWanderStore] Database reset error:", error);
     } finally {
       set({ loading: false });
     }

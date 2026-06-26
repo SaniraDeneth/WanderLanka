@@ -45,6 +45,7 @@ export default function ProfileScreen() {
   const destinations = useWanderStore((s) => s.destinations);
   const plans = useWanderStore((s) => s.plans);
   const toggleFavorite = useWanderStore((s) => s.toggleFavorite);
+  const resetDatabase = useWanderStore((s) => s.resetDatabase);
 
   const savedSpots = destinations.filter((d) => d.isFavorite);
   const savedPlans = plans.filter((p) => p.isFavorite);
@@ -79,6 +80,7 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             await clearProfile();
+            await resetDatabase();
             router.replace("/");
           },
         },

@@ -200,5 +200,70 @@ export const dbService = {
         );
       }
     });
+  },
+
+  async resetDatabase(): Promise<void> {
+    try {
+      const db = await this.getDb();
+      Logger.log("[dbService] Resetting database...");
+      
+      // Drop tables to ensure clean state
+      await db.execAsync("DROP TABLE IF EXISTS plan_destinations;");
+      await db.execAsync("DROP TABLE IF EXISTS plans;");
+      await db.execAsync("DROP TABLE IF EXISTS destinations;");
+      await db.execAsync("DROP TABLE IF EXISTS categories;");
+
+      // Recreate tables
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE,
+          image_uri TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS destinations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          category_id INTEGER NOT NULL,
+          vibe_tag TEXT NOT NULL,
+          latitude REAL NOT NULL,
+          longitude REAL NOT NULL,
+          image_uri TEXT NOT NULL,
+          rating REAL DEFAULT 5.0,
+          entry_fee TEXT NOT NULL,
+          is_favorite INTEGER DEFAULT 0,
+          FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS plans (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          overview TEXT NOT NULL,
+          duration TEXT NOT NULL,
+          rating REAL DEFAULT 5.0,
+          image_uri TEXT NOT NULL,
+          is_favorite INTEGER DEFAULT 0,
+          budget REAL DEFAULT 150.0
+        );
+
+        CREATE TABLE IF NOT EXISTS plan_destinations (
+          plan_id INTEGER NOT NULL,
+          destination_id INTEGER NOT NULL,
+          day_number INTEGER NOT NULL,
+          sequence_order INTEGER NOT NULL,
+          budget REAL DEFAULT 150.0,
+          PRIMARY KEY (plan_id, destination_id),
+          FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
+          FOREIGN KEY (destination_id) REFERENCES destinations (id) ON DELETE CASCADE
+        );
+      `);
+
+      await this.seedData(db);
+      Logger.log("[dbService] Database reset completed.");
+    } catch (error) {
+      Logger.error("[dbService] Reset database failed:", error);
+      throw error;
+    }
   }
 };

@@ -39,11 +39,9 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     if (currentLat !== null && currentLng !== null) {
       const distance = getDistanceInKm(currentLat, currentLng, latitude, longitude);
       if (distance < 0.1) {
-        Logger.log(`[Location Store] Ignored minor location change (${(distance * 1000).toFixed(0)}m) to prevent layout churn.`);
         return;
       }
     }
-    Logger.log(`[Location Store] Store updated to: Lat=${latitude}, Lng=${longitude}`);
     set({ userLatitude: latitude, userLongitude: longitude });
   },
 
@@ -73,7 +71,6 @@ export const useLocationStore = create<LocationState>((set, get) => ({
             );
           }, 500);
         }
-        Logger.log("[Location Store] Location permission denied. Using Colombo fallback.");
         get().setUserLocation(6.9271, 79.8612);
         return;
       }
@@ -82,7 +79,6 @@ export const useLocationStore = create<LocationState>((set, get) => ({
         accuracy: Location.Accuracy.Balanced,
       });
 
-      Logger.log(`[Location Store] Live device coordinates: Lat=${location.coords.latitude}, Lng=${location.coords.longitude}`);
       get().setUserLocation(location.coords.latitude, location.coords.longitude);
     } catch (error) {
       Logger.error("[Location Store] fetchUserLocation error:", error);

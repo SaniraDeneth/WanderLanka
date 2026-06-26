@@ -247,9 +247,25 @@ export function useExploreScreenData() {
         spotsSortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
       );
     } else {
-      result.sort((a, b) =>
-        spotsSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
-      );
+      result.sort((a, b) => {
+        if (searchQuery) {
+          const lowerQuery = searchQuery.toLowerCase();
+          const getRelevance = (title: string, desc: string) => {
+            const t = title.toLowerCase();
+            if (t === lowerQuery) return 4;
+            if (t.startsWith(lowerQuery)) return 3;
+            if (t.includes(lowerQuery)) return 2;
+            if (desc.toLowerCase().includes(lowerQuery)) return 1;
+            return 0;
+          };
+          const relA = getRelevance(a.title, a.description);
+          const relB = getRelevance(b.title, b.description);
+          if (relA !== relB) {
+            return spotsSortOrder === "asc" ? relB - relA : relA - relB;
+          }
+        }
+        return spotsSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+      });
     }
 
     return result;
@@ -292,9 +308,25 @@ export function useExploreScreenData() {
         plansSortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
       );
     } else {
-      result.sort((a, b) =>
-        plansSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
-      );
+      result.sort((a, b) => {
+        if (searchQuery) {
+          const lowerQuery = searchQuery.toLowerCase();
+          const getRelevance = (title: string, desc: string) => {
+            const t = title.toLowerCase();
+            if (t === lowerQuery) return 4;
+            if (t.startsWith(lowerQuery)) return 3;
+            if (t.includes(lowerQuery)) return 2;
+            if (desc.toLowerCase().includes(lowerQuery)) return 1;
+            return 0;
+          };
+          const relA = getRelevance(a.title, a.overview);
+          const relB = getRelevance(b.title, b.overview);
+          if (relA !== relB) {
+            return plansSortOrder === "asc" ? relB - relA : relA - relB;
+          }
+        }
+        return plansSortOrder === "asc" ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+      });
     }
 
     return result;

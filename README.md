@@ -1,50 +1,74 @@
-# Welcome to your Expo app 👋
+# WanderLanka 🇱🇰
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+WanderLanka is a premium, localized travel companion application built to help users explore the most beautiful destinations and travel plans across Sri Lanka. It features offline database persistence, live GPS location tracking, responsive design layouts, dynamic search filtering, and custom traveler profile badges.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Technology Stack & Frameworks
 
-   ```bash
-   npm install
-   ```
+*   **Core Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (SDK 54)
+*   **Routing & Navigation:** [Expo Router](https://docs.expo.dev/router/introduction/) (File-based navigation)
+*   **Styling:** [NativeWind v4](https://www.nativewind.dev/) (Tailwind CSS for React Native)
+*   **State Management:** [Zustand](https://github.com/pmndrs/zustand)
+*   **Database:** [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (High-performance offline storage and seeding)
+*   **Location Services:** [expo-location](https://docs.expo.dev/versions/latest/sdk/location/) (Live GPS tracking and Colombo fallback)
+*   **Asset Handling:** [expo-image](https://docs.expo.dev/versions/latest/sdk/image/) & [expo-image-picker](https://docs.expo.dev/versions/latest/sdk/image-picker/)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🛠️ System Dependencies
 
-In the output, you'll find options to open the app in a
+Before you begin, ensure you have the following installed on your machine:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1.  **Node.js:** v18.0.0 or higher
+2.  **Package Manager:** [Bun](https://bun.sh/) (Recommended) or `npm`
+3.  **Expo CLI:** Installed globally or run via local bundlers (`npx expo`)
+4.  **Emulators/Simulators:**
+    *   **iOS:** [Xcode](https://developer.apple.com/xcode/) (macOS only) with iOS Simulator
+    *   **Android:** [Android Studio](https://developer.android.com/) with an active Android Virtual Device (AVD)
+5.  **Physical Device Testing:** Install the **Expo Go** application from the iOS App Store or Android Play Store.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 💻 Getting Started
 
-When you're ready, run:
+Follow these steps to run the application locally:
 
+### 1. Clone & Navigate
 ```bash
-npm run reset-project
+git clone https://github.com/SaniraDeneth/WanderLanka
+cd WanderLanka
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Install Dependencies
+Using Bun (recommended):
+```bash
+bun install
+```
+Or using npm:
+```bash
+npm install
+```
 
-## Learn more
+### 3. Start the Development Server
+```bash
+bun start
+# or npm start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### 4. Launching the App
+In the terminal, use the interactive shortcuts to run the app:
+*   Press **`i`** to open the **iOS Simulator**.
+*   Press **`a`** to open the **Android Emulator**.
+*   Scan the displayed **QR Code** using your phone's camera (iOS) or the Expo Go App (Android) to run it on a physical device.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 🗺️ Key Features & Layouts
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+*   **Interactive Maps:** Visualizes Sri Lankan destinations using native maps. Includes card views with directions and details.
+*   **Search & Dynamic Filters:** Instantly search through 97+ spots or plans, filter by Vibe (Nature, Adventure, Culture, Relax, Luxury), Category, budget, distance, or ratings.
+*   **Smart Location Services:** Sorts destinations by distance relative to your current location (updates efficiently to avoid battery drain).
+*   **Interactive Pull-to-Clear:** Easily wipe active search filters on the Explore screen with an interactive swipe-down gesture.
+*   **Traveler Profiles:** Customize names, select unique explorer badges, upload custom profile pictures, save favorites, and clear data to reset.
+*   **Offline First:** Pre-seeded with 97 Sri Lankan landmarks that load instantly from an offline SQLite database. Clearing profile data wipes and re-seeds the database for a fresh start.

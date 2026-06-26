@@ -31,12 +31,12 @@ export default function WelcomeScreen() {
       {/* Bottom Content Section */}
       <View className="flex-1 items-center px-7 pb-3 relative">
         {/* Logo Brand Typography */}
-        <Text className="font-bebas text-7xl text-brand-black  text-center">
+        <Text className="font-bebas text-5xl text-brand-black  text-center">
           WANDAR <Text className="text-brand-green">LANKA</Text>
         </Text>
 
         {/* Description */}
-        <Text className="font-bebas text-2xl text-gray-600 text-center mt-2.5 leading-5.75 max-w-67.5">
+        <Text className="font-bebas text-xl text-gray-600 text-center mt-2.5 leading-5.75 max-w-67.5">
           Your ultimate localized companion for exploring the island.
         </Text>
 

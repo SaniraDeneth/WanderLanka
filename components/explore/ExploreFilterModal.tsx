@@ -297,7 +297,12 @@ export default function ExploreFilterModal({
                 <Text className="font-montserrat-bold text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">
                   SORT BY
                 </Text>
-                <View className="flex-row gap-2 mb-3">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8 }}
+                  className="mb-3"
+                >
                   <FilterChip
                     label="NAME"
                     isActive={sortBy === "name"}
@@ -332,13 +337,17 @@ export default function ExploreFilterModal({
                       }
                     }}
                   />
-                </View>
+                </ScrollView>
 
                 {/* SORT DIRECTION SECTION */}
                 <Text className="font-montserrat-bold text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">
                   SORT DIRECTION
                 </Text>
-                <View className="flex-row gap-2">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8 }}
+                >
                   <FilterChip
                     label="ASCENDING"
                     isActive={sortOrder === "asc"}
@@ -349,7 +358,7 @@ export default function ExploreFilterModal({
                     isActive={sortOrder === "desc"}
                     onPress={() => setSortOrder("desc")}
                   />
-                </View>
+                </ScrollView>
               </View>
             </ScrollView>
 

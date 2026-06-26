@@ -14,4 +14,40 @@
   --color-brand-evergreen: #228B22;
   --color-brand-mint: #F0FAF0;
   --color-brand-offwhite: #FDFAF4;
+
+  /* Responsive Scaling using Viewport Width (vw) based on 393px standard screen (iPhone 15) */
+  --text-xs: 3.05vw;
+  --text-sm: 3.56vw;
+  --text-base: 4.07vw;
+  --text-lg: 4.58vw;
+  --text-xl: 5.09vw;
+  --text-2xl: 6.11vw;
+  --text-3xl: 7.63vw;
+  --text-4xl: 9.16vw;
+  --text-5xl: 12.21vw;
+  --text-6xl: 15.27vw;
+  --text-7xl: 18.32vw;
+  --text-8xl: 24.43vw;
+  --text-9xl: 32.57vw;
+
+  --spacing-0-5: 0.51vw;
+  --spacing-1: 1.02vw;
+  --spacing-1-5: 1.53vw;
+  --spacing-2: 2.04vw;
+  --spacing-2-5: 2.54vw;
+  --spacing-3: 3.05vw;
+  --spacing-3-5: 3.56vw;
+  --spacing-4: 4.07vw;
+  --spacing-5: 5.09vw;
+  --spacing-6: 6.11vw;
+  --spacing-8: 8.14vw;
+  --spacing-10: 10.18vw;
+  --spacing-12: 12.21vw;
+  --spacing-16: 16.28vw;
+  --spacing-20: 20.36vw;
+  --spacing-24: 24.43vw;
+  --spacing-32: 32.57vw;
+  --spacing-40: 40.71vw;
+  --spacing-48: 48.85vw;
+  --spacing-64: 65.14vw;
 }

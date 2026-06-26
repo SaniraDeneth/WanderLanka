@@ -18,10 +18,10 @@ export default function CategoryCircle({
     <Pressable onPress={onPress} className="items-center mr-5">
       {/* Outer ring for active state */}
       <View
-        className={`rounded-full p-0.75 ${isActive ? "bg-brand-green" : "bg-transparent"
+        className={`rounded-full p-[2px] ${isActive ? "border-2 border-brand-green" : "border-2 border-transparent"
           }`}
       >
-        <View className="w-15 h-15 rounded-full overflow-hidden border-2 border-white shadow-sm">
+        <View className="w-15 h-15 rounded-full overflow-hidden border-2 border-white shadow-sm bg-gray-100">
           <Image
             source={getLocalImage(imageUri)}
             className="w-full h-full"

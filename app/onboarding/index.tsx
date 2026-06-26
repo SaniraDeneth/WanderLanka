@@ -88,7 +88,7 @@ export default function OnboardingScreen() {
             /* STEP 1: Name Input Screen */
             <View className="flex-1 justify-between">
               <View>
-                <Text className="font-bebas text-5xl text-brand-black leading-tight">
+                <Text className="font-bebas text-3xl text-brand-black leading-tight">
                   TELL US YOUR NAME
                 </Text>
                 <Text className="font-montserrat text-sm text-gray-500 mt-2 leading-relaxed">
@@ -125,7 +125,7 @@ export default function OnboardingScreen() {
             /* STEP 2: Profile Picture Selection Grid */
             <View className="flex-1 justify-between">
               <View>
-                <Text className="font-bebas text-5xl text-brand-black leading-tight">
+                <Text className="font-bebas text-3xl text-brand-black leading-tight">
                   CHOOSE A PROFILE PICTURE
                 </Text>
                 <Text className="font-montserrat text-sm text-gray-500 mt-2 leading-relaxed">
@@ -171,7 +171,7 @@ export default function OnboardingScreen() {
                 <Pressable
                   onPress={handleTakePhoto}
                   className={`w-full flex-row items-center justify-center bg-white border border-gray-200/80 py-4 px-6 rounded-2xl shadow-sm mb-6 ${selectedAvatar === "camera-photo" ? "border-brand-green bg-brand-green/5" : ""
-                    } active:scale-[0.98]`}
+                    }`}
                 >
                   <Ionicons
                     name={selectedAvatar === "camera-photo" ? "checkmark-circle" : "camera-outline"}

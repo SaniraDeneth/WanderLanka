@@ -28,7 +28,7 @@ export default function Button({
         className
       )}
     >
-      <Text className={twMerge("font-bebas text-4xl text-white", textClassName)}>
+      <Text className={twMerge("font-bebas text-3xl text-white", textClassName)}>
         {title}
       </Text>
     </Pressable>
